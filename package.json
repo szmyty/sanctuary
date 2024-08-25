@@ -39,5 +39,25 @@
         "eslint": "^9.9.1",
         "husky": "^9.1.5",
         "shellcheck": "^3.0.0"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "pnpm run lint:all",
+            "commit-msg": "pnpm run commitlint --edit $1"
+        }
+    },
+    "commitlint": {
+        "extends": [
+            "@commitlint/config-conventional"
+        ],
+        "rules": {
+            "subject-case": [
+                2,
+                "always",
+                [
+                    "sentence-case"
+                ]
+            ]
+        }
     }
 }
