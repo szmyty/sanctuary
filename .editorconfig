@@ -43,7 +43,7 @@ indent_size = 2
 # Specific settings for JSON files
 [*.json]
 # JSON files typically use 2 spaces for indentation
-indent_size = 2
+indent_size = 4
 
 # Specific settings for HTML files
 [*.html]
