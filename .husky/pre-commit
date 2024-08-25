@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# -----------------------------------------------------------------------------
+# File: pre-commit
+#
+# Purpose: Husky Git hook to ensure code quality before committing
+#
+# Description: This script is executed automatically by Husky before each commit.
+#
+# It runs linting, formatting, and any other checks to prevent bad code
+# from being committed.
+#
+# Author: Alan Szmyt
+# -----------------------------------------------------------------------------
+# Best Practices:
+# - Make sure this file is executable: `chmod +x .husky/pre-commit`
+# - Customize the commands to suit your project's needs.
+# - Ensure that each command has proper error handling and returns a non-zero exit code on failure.
+# - Use environment variables or configuration files if needed for dynamic settings.
+# -----------------------------------------------------------------------------
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Print all commands before executing them (optional)
+set -x
+
+# Run linting (adjust the command based on your project's linting setup)
+echo "Running lint checks..."
+pnpm lint
+
+# Run code formatting check (optional: depends on your project setup)
+echo "Checking code formatting..."
+pnpm format:check
+
+# Run tests (optional: if you want to ensure tests pass before committing)
+echo "Running tests..."
+pnpm test
+
+# If all checks pass, the commit will proceed
+echo "All checks passed. Proceeding with commit."
+
+# Exit with status 0 to allow commit
+exit 0
