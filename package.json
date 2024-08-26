@@ -16,7 +16,6 @@
         "install:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh - && pnpm install",
         "install:asdf": "asdf install",
         "install:shellcheck": "asdf install shellcheck",
-        "prepare": "husky",
         "commit": "cz"
     },
     "keywords": [
@@ -39,5 +38,6 @@
         "eslint": "^9.9.1",
         "husky": "^9.1.5",
         "shellcheck": "^3.0.0"
-    }
+    },
+    "packageManager": "pnpm@9.8.0"
 }
