@@ -17,7 +17,8 @@
         "install:asdf": "asdf install",
         "install:shellcheck": "asdf install shellcheck",
         "commit": "cz",
-        "postinstall": "syncpack fix-mismatches"
+        "postinstall": "syncpack fix-mismatches",
+        "trying": "syncpack --version"
     },
     "keywords": [
         "development",
@@ -52,5 +53,8 @@
         "requiredScripts": [
             "build"
         ]
+    },
+    "dependencies": {
+        "depcheck": "1.4.7"
     }
 }
