@@ -399,7 +399,7 @@ dw_php_codehinting.config
 
 # Eclipse project-specific files
 .metadata
-bin/
+# bin/
 tmp/
 *.tmp
 *.bak
@@ -540,7 +540,7 @@ flycheck_*.el
 # --------------------------
 
 # FlexBuilder project directories
-bin/
+# bin/
 bin-debug/
 bin-release/
 
@@ -1332,7 +1332,7 @@ ehthumbs_vista.db
 [Dd]esktop.ini
 
 # Windows Recycle Bin used on file shares
-$RECYCLE.BIN/
+# $RECYCLE.BIN/
 
 # Windows Installer files
 *.cab
@@ -1810,7 +1810,7 @@ stylesheets/bundles
 /cookbooks
 
 # Bundler
-bin/*
+# bin/*
 .bundle/*
 
 .kitchen/
@@ -3075,7 +3075,7 @@ Homestead.json
 boot.php
 index.php
 install.php
-/config/*
+# /config/*
 !/config/config.php
 /controllers/*
 /init/*
@@ -3618,7 +3618,7 @@ inc/
 # PlayFramework
 # --------------------------
 # Ignore Play! working directory #
-bin/
+# bin/
 /db
 .eclipse
 # /lib/
@@ -3646,7 +3646,7 @@ server.pid
 *.egg-info
 *.EGG-INFO
 .*.cfg
-bin/
+# bin/
 build/
 develop-eggs/
 downloads/
@@ -4014,7 +4014,7 @@ fastlane/test_output
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache
-/bin/*
+# /bin/*
 !bin/console
 !bin/symfony_requirements
 /vendor/
@@ -4174,20 +4174,20 @@ acs-*.bib
 *.tfm
 
 #(r)(e)ledmac/(r)(e)ledpar
-*.end
-*.?end
-*.[1-9]
-*.[1-9][0-9]
-*.[1-9][0-9][0-9]
-*.[1-9]R
-*.[1-9][0-9]R
-*.[1-9][0-9][0-9]R
-*.eledsec[1-9]
-*.eledsec[1-9]R
-*.eledsec[1-9][0-9]
-*.eledsec[1-9][0-9]R
-*.eledsec[1-9][0-9][0-9]
-*.eledsec[1-9][0-9][0-9]R
+# *.end
+# *.?end
+# *.[1-9]
+# *.[1-9][0-9]
+# *.[1-9][0-9][0-9]
+# *.[1-9]R
+# *.[1-9][0-9]R
+# *.[1-9][0-9][0-9]R
+# *.eledsec[1-9]
+# *.eledsec[1-9]R
+# *.eledsec[1-9][0-9]
+# *.eledsec[1-9][0-9]R
+# *.eledsec[1-9][0-9][0-9]
+# *.eledsec[1-9][0-9][0-9]R
 
 # glossaries
 *.acn
@@ -4671,7 +4671,7 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
+# [Bb]in/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
