@@ -2,7 +2,7 @@
 
 ## Description
 
-Also commonly referred to as the EUPL, this license is an open-source (copyleft free) software license developed on the initiative of the European Commission. It was approved by the same body in 22 official languages of the European Union. Any use of Work is completely prohibited, especially if it is not covered under this license.
+Also commonly referred to as the EUPL, this licence is an open-source (copyleft free) software licence developed on the initiative of the European Commission. It was approved by the same body in 22 official languages of the European Union. Any use of Work is completely prohibited, especially if it is not covered under this licence.
 
 ---
 
