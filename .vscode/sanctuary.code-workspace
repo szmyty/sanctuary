@@ -132,7 +132,9 @@
         "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
         "files.associations": {
             ".pnpmignore": "ignore",
-            "husky/**": "shellscript"
+            "commit-msg": "shellscript",
+            "pre-commit": "shellscript",
+            "*.mailmap": "plaintext"
         },
         "cSpell.words": ["commitlint", "shellcheck"]
     }

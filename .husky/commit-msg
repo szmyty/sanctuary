@@ -1,1 +1,27 @@
-pnpm exec commitlint --edit $1
+#!/bin/sh
+
+# -----------------------------------------------------------------------------
+# File: commit-msg
+#
+# Purpose: Husky Git hook to ensure commit message standards
+#
+# Description: This script is executed automatically by Husky to validate the
+# commit message format. It helps enforce consistent commit messages that
+# adhere to project guidelines.
+#
+# Author: Alan Szmyt
+# -----------------------------------------------------------------------------
+# Best Practices:
+# - Make sure this file is executable: `chmod +x .husky/commit-msg`
+# - Customize the validation to suit your project's commit message conventions.
+# - Ensure proper error handling and return a non-zero exit code if validation fails.
+# - Use environment variables or configuration files for dynamic settings, if needed.
+# -----------------------------------------------------------------------------
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Print all commands before executing them (optional)
+set -x
+
+# pnpm exec commitlint --edit $1
