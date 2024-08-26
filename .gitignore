@@ -2018,7 +2018,7 @@ time-of-build-pretty.log
 .dub
 docs.json
 __dummy.html
-docs/
+# docs/
 
 # Code coverage
 *.lst

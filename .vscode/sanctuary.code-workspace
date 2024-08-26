@@ -136,6 +136,6 @@
             "pre-commit": "shellscript",
             "*.mailmap": "plaintext"
         },
-        "cSpell.words": ["commitlint", "shellcheck"]
+        "cSpell.words": ["commitlint", "Mulan", "shellcheck", "syncpack"]
     }
 }

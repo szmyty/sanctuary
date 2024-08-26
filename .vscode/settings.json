@@ -1,6 +1,11 @@
 {
     "search.exclude": {
-        "/public/locales/**": true
+        "/public/locales/**": true,
+        // Avoid polluting search results with lockfile content
+        "pnpm-lock.yaml": true
     },
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    // Ensure VSCode uses pnpm instead of npm
+    "eslint.packageManager": "pnpm",
+    "npm.packageManager": "pnpm"
 }
