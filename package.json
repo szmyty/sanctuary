@@ -30,7 +30,7 @@
     "license": "MIT",
     "engines": {
         "node": ">=20.17.0",
-        "pnpm": ">=9.8.0",
+        "pnpm": ">=9.9.0",
         "npm": ">=10.8.2"
     },
     "engineStrict": true,
@@ -45,7 +45,7 @@
         "shellcheck": "^3.0.0",
         "syncpack": "^13.0.0"
     },
-    "packageManager": "pnpm@9.8.0",
+    "packageManager": "pnpm@9.9.0",
     "eslintConfig": {
         "extends": "google"
     },
