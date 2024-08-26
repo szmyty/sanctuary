@@ -35,10 +35,10 @@
     },
     "engineStrict": true,
     "devDependencies": {
-        "@commitlint/cli": "^19.4.0",
+        "@commitlint/cli": "catalog:workspace",
         "@commitlint/config-conventional": "^19.2.2",
-        "asdf": "^1.2.3",
-        "commitizen": "^4.3.0",
+        "asdf": "catalog:workspace",
+        "commitizen": "catalog:workspace",
         "cz-conventional-changelog": "^3.3.0",
         "eslint": "^9.9.1",
         "husky": "^9.1.5",
