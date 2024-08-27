@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+######################################################################
+# @Project      : sanctuary
+# @File         : sanctuary
+# @Description  : Bash script to bring up the Docker Compose services
+#                 for the Sanctuary project. This script is designed
+#                 to be easily expandable as more services are added
+#                 to the project.
+#
+# @Author       : Alan Szmyt
+# @Date         : 2024-08-22
+# @Version      : 1.0
+######################################################################
+
+# Array of services to bring up. Add more services here as needed.
+services=("tiledb")
+
+# Base Docker Compose command, broken into multiple lines for readability.
+cmd=(
+  "docker" "compose"
+  "--file" "sanctuary.yml"
+  "--env-file" "sanctuary.env"
+  "--parallel" "1"
+  "--ansi" "always"
+  "up"
+  "--build"
+  "--force-recreate"
+  "--remove-orphans"
+)
+
+# Add services to the command, with --no-deps to skip dependency services.
+for service in "${services[@]}"; do
+  cmd+=("--no-deps" "${service}")
+done
+
+# Append any additional arguments passed to the script.
+cmd+=("$@")
+
+# Echo the final command for visibility.
+echo "Executing: ${cmd[*]}"
+
+# Execute the final command.
+"${cmd[@]}"

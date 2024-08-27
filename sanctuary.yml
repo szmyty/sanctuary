@@ -1,0 +1,22 @@
+######################################################################
+# @Project      : sanctuary
+# @File         : sanctuary.yml
+# @Description  : Docker Compose setup file for the Sanctuary project.
+#                 This file includes the configuration for shared labels
+#                 and dynamically includes service-specific YAML files.
+#
+# @Author       : Alan Szmyt
+# @Date         : 2024-08-22
+# @Version      : 1.0
+######################################################################
+
+# Define common labels for Docker objects
+x-labels: &labels
+  labels:
+    app.name: ${COMPOSE_PROJECT_NAME} # Name of the application, set using the Compose project name
+
+# Include external Docker Compose files for specific services
+include:
+  - path: ${CONTAINERS_ROOT}/tiledb/tiledb.yml # Path to the TileDB service Docker Compose file
+    project_directory: ${CONTAINERS_ROOT}/tiledb # Directory containing the TileDB service files
+    env_file: ${CONTAINERS_ROOT}/tiledb/tiledb.env # Environment file specific to the TileDB service

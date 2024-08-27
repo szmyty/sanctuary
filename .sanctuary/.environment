@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# Function to get the parent directory of a given path
+sanctuary::environment::get_parent_directory() {
+  local _path="$1"
+  dirname "${_path}"
+}
+
+# Function to get the script's directory
+sanctuary::environment::get_script_directory() {
+  local _source
+  _source="${BASH_SOURCE[0]}"
+  local _dir
+  _dir="$(cd "$(dirname "${_source}")" && pwd)"
+  printf "%s\n" "${_dir}"
+}
+
+# Function to get the project root directory (two levels up from the script directory)
+sanctuary::environment::get_project_root() {
+  local _script_dir
+  local _project_root
+  _script_dir="$(sanctuary::environment::get_script_directory)"
+  _project_root="$(cd "${_script_dir}/.." && pwd)"
+  printf "%s\n" "${_project_root}"
+}
+
+# Function to set up environment variables
+sanctuary::environment::setup_environment() {
+  local _project_root
+  _project_root="$(sanctuary::environment::get_project_root)"
+
+  export SANCTUARY_PROJECT_ROOT="${_project_root}"
+  export SANCTUARY_ROOT="${SANCTUARY_PROJECT_ROOT}/.sanctuary"
+  export SANCTUARY_DEVTOOLS_ROOT="${SANCTUARY_ROOT}/devtools"
+  export SANCTUARY_PNPM_INSTALL_DIR="${SANCTUARY_DEVTOOLS_ROOT}/pnpm"
+  export PNPM_HOME="${SANCTUARY_PNPM_INSTALL_DIR}"
+  export SANCTUARY_BIN_DIR="${SANCTUARY_DEVTOOLS_ROOT}/bin"
+  export SANCTUARY_ASDF_HOME="${SANCTUARY_DEVTOOLS_ROOT}/asdf"
+
+  # asdf environment variables
+  export ASDF_DATA_DIR="${SANCTUARY_ASDF_HOME}/.asdf"
+  export ASDF_DEFAULT_TOOL_VERSIONS_FILENAME="${SANCTUARY_ASDF_HOME}/.tool-versions"
+
+  # Set the custom shell for the environment
+  export SHELL="${SANCTUARY_ROOT}/.shell"
+
+  # Add PNPM and bin directory to the PATH
+  export PATH="${SANCTUARY_BIN_DIR}:${PNPM_HOME}/bin:${PATH}"
+
+  # Export URLs for installation scripts and plugins
+  export GITHUB_URL_ASDF_REPO="https://github.com/asdf-vm/asdf.git"
+  export GITHUB_URL_PNPM_INSTALL_SCRIPT="https://get.pnpm.io/install.sh"
+  export ASDF_PLUGIN_URL_SHELLCHECK="https://github.com/luizm/asdf-shellcheck.git"
+}
+
+# Call the setup function to initialize environment variables
+sanctuary::environment::setup_environment

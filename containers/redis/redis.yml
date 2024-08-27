@@ -1,0 +1,6 @@
+---
+# Define common labels for Docker objects
+x-labels: &labels
+  labels:
+    app.name: ${COMPOSE_PROJECT_NAME} # Name of the application, set using the Compose project name
+

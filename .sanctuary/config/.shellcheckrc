@@ -1,0 +1,52 @@
+# .shellcheckrc
+#
+# ShellCheck configuration file
+#
+# This file contains configuration options for ShellCheck, a popular
+# static analysis tool for shell scripts. It is used to identify
+# potential issues, enforce best practices, and improve the overall
+# quality of shell scripts. This configuration file is designed to
+# be comprehensive and should cover most common scenarios encountered
+# during script development.
+#
+# For more information about ShellCheck, visit: https://www.shellcheck.net/
+
+# Set shell dialect to bash (default: bash)
+# You can change this to 'sh', 'dash', 'ksh', or 'zsh' if needed.
+shell=bash
+
+# Enable warnings for all scripts, not just when ShellCheck is invoked from a terminal
+# This is useful for CI environments or when ShellCheck is invoked programmatically.
+# This option is the default and is included here for clarity.
+external-sources=true
+
+# Enable specific ShellCheck warnings
+# These are the common warnings that help improve script quality.
+# Add or remove based on your project needs.
+enable=all # Enable all warnings.
+
+# Disable specific ShellCheck warnings
+# These are warnings that may be too strict or not applicable to your project.
+# disable=
+
+# Set severity levels
+# ShellCheck allows you to set different severity levels for different types of issues.
+# These can be 'error', 'warning', or 'info'.
+# The default severity level is 'warning'.
+
+# ShellCheck ignores files/directories that match these patterns.
+# You can add patterns to exclude specific files or directories.
+exclude=.git
+exclude=.svn
+exclude=.hg
+exclude=node_modules
+exclude=vendor
+
+# Ignore certain rules within specific files or directories
+# You can use this section to apply specific ignores within certain parts of your project.
+# ignorefile=.sanctuary/.shellcheckignore
+
+# Additional comments or project-specific configurations can go here.
+# Feel free to customize this file as needed for your project.
+
+# End of .shellcheckrc

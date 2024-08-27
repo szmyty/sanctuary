@@ -1,0 +1,42 @@
+######################################################################
+# @Project      : sanctuary
+# @File         : common.yml
+# @Description  : Common Docker Compose settings shared across all
+#                 containers in the project. This file defines standard
+#                 labels, environment variables, and other shared settings
+#                 to ensure uniformity and consistency across the setup.
+#
+# @Author       : Alan Szmyt
+# @Date         : 2024-08-22
+# @Version      : 1.0
+######################################################################
+
+# Define common labels for Docker objects
+x-labels: &labels
+  labels:
+    app.name: ${COMPOSE_PROJECT_NAME} # Name of the application, set using the Compose project name
+
+# Shared settings for all containers
+x-settings:
+  &settings # Allow containers to access the host machine using the host.docker.internal alias
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  # Restart the container unless it was explicitly stopped by the user
+  restart: unless-stopped
+  # Load environment variables from the common.env file
+  env_file:
+    - common.env
+  # No proxy setting for the entire environment (handles proxy settings internally)
+  environment:
+    - no_proxy="*"
+    - NO_PROXY="*"
+  # Attach the container to the project network defined in the network.yml file
+  networks:
+    - ${COMPOSE_PROJECT_NAME}-network
+  <<: *labels # Apply the common labels to the container
+
+# Define a base service that other services can inherit from
+services:
+  base:
+    # Inherit all common settings defined above
+    <<: *settings
