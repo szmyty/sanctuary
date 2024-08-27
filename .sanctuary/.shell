@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Custom environment setup can go here
+echo "Entering Sanctuary environment with custom shell..."
+
+# Source asdf.sh if it exists
+if [ -f "${SANCTUARY_ASDF_HOME:-}/asdf.sh" ]; then
+    . "${SANCTUARY_ASDF_HOME}/asdf.sh"
+fi
+
+# Execute the bash shell
+exec /bin/bash "$@"

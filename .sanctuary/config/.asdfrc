@@ -1,0 +1,51 @@
+# .asdfrc
+# This file is used by asdf to configure global settings for the asdf version manager.
+# The settings here affect how asdf operates across all projects.
+
+# Set the path where plugins are installed.
+# By default, this is set to $HOME/.asdf/plugins, but you can change it to a custom path.
+# For example, to set it to a custom directory in the sanctuary project:
+# plugin_path = "$SANCTUARY_DEVTOOLS_ROOT/plugins"
+plugin_path = "$HOME/.asdf/plugins"
+
+# Set the legacy version file behavior.
+# If enabled, asdf will read legacy version files (like .ruby-version) to determine which version to use.
+# By default, this is disabled.
+# Set it to yes to enable reading legacy version files.
+legacy_version_file = no
+
+# Control whether asdf should resolve symlinks before checking the version.
+# This is useful if you have symlinks pointing to different tool versions.
+# The default is no.
+resolve_symlinks = no
+
+# Configure the shell used by asdf when running commands.
+# By default, it uses the system's default shell.
+# For example, you can set it to use bash explicitly:
+# shell = "/bin/bash"
+shell = "$SHELL"
+
+# Set the default plugin repository to be used by asdf.
+# By default, asdf uses https://github.com/asdf-vm/asdf-plugins.git, but you can point it to a custom plugin repository.
+# plugin_repository = "https://github.com/asdf-vm/asdf-plugins.git"
+
+# Control whether asdf will update plugins automatically when a new version is available.
+# The default is no.
+# auto_update_plugins = no
+
+# Set the default path for asdf to install versions of tools.
+# By default, this is set to $HOME/.asdf/installs, but you can change it to a custom path.
+# install_path = "$SANCTUARY_DEVTOOLS_ROOT/installs"
+
+# Enable/disable telemetry for asdf.
+# By default, telemetry is disabled.
+# telemetry = no
+
+# Set the logging level for asdf commands.
+# Available levels are "info", "warn", "error", and "debug".
+# The default level is "info".
+# logging_level = "info"
+
+# If you want to force asdf to use shims, even if a globally installed binary is available,
+# you can set this option to yes. The default is no.
+# always_use_shims = no
