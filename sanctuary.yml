@@ -17,6 +17,11 @@ x-labels: &labels
 
 # Include external Docker Compose files for specific services
 include:
-  - path: ${CONTAINERS_ROOT}/tiledb/tiledb.yml # Path to the TileDB service Docker Compose file
-    project_directory: ${CONTAINERS_ROOT}/tiledb # Directory containing the TileDB service files
-    env_file: ${CONTAINERS_ROOT}/tiledb/tiledb.env # Environment file specific to the TileDB service
+  # Path to the Base service Docker Compose file
+  - path: ${CONTAINERS_ROOT}/base/base.yml
+    project_directory: ${CONTAINERS_ROOT}/base
+    env_file: ${CONTAINERS_ROOT}/base/base.env
+  # Path to the TileDB service Docker Compose file
+  # - path: ${CONTAINERS_ROOT}/tiledb/tiledb.yml
+  #   project_directory: ${CONTAINERS_ROOT}/tiledb
+  #   env_file: ${CONTAINERS_ROOT}/tiledb/tiledb.env

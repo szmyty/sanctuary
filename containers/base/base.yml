@@ -1,0 +1,22 @@
+---
+# Define common labels for Docker objects
+x-labels: &labels
+  labels:
+    # Name of the application, set using the Compose project name
+    app.name: ${COMPOSE_PROJECT_NAME}
+
+services:
+  base:
+    extends:
+      file: ../common.yml
+      service: base
+    hostname: ${COMPOSE_PROJECT_NAME}.${BASE_HOSTNAME}
+    container_name: ${COMPOSE_PROJECT_NAME}-${BASE_HOSTNAME}
+    image: ${COMPOSE_PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}
+    build:
+      context: .
+      dockerfile: base.Dockerfile
+      args:
+        - DEBIAN_IMAGE_VERSION=${DEBIAN_IMAGE_VERSION:-bullseye-20240812}
+    env_file:
+      - base.env

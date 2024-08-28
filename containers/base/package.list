@@ -1,0 +1,66 @@
+# -----------------------------------------------------------------------------
+# File: package.list
+#
+# Purpose: List of common Debian packages for installing into a base image.
+#
+# Description: This file contains a list of essential and commonly used
+# Debian packages for building and developing applications within a Docker
+# container. This list can be extended or modified based on the specific
+# needs of your project.
+#
+# Author: Alan Szmyt
+# -----------------------------------------------------------------------------
+
+# Essential packages
+build-essential
+curl
+git
+wget
+locales
+ca-certificates
+
+# Networking tools
+net-tools
+iproute2
+iputils-ping
+dnsutils
+
+# Debugging and development tools
+gdb
+strace
+lsof
+vim
+
+# Version control and SCM
+subversion
+
+# Shell and terminal utilities
+bash
+zsh
+tmux
+screen
+
+# Package management tools
+apt-utils
+software-properties-common
+
+# Text processing and editing
+nano
+sed
+gawk
+
+# Compression and archiving
+tar
+gzip
+bzip2
+zip
+unzip
+
+# Miscellaneous utilities
+sudo
+tree
+htop
+jq
+
+# Clean up
+# Clean up the package cache after installation

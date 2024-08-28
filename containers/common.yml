@@ -18,7 +18,8 @@ x-labels: &labels
 
 # Shared settings for all containers
 x-settings:
-  &settings # Allow containers to access the host machine using the host.docker.internal alias
+  # Allow containers to access the host machine using the host.docker.internal alias
+  &settings
   extra_hosts:
     - "host.docker.internal:host-gateway"
   # Restart the container unless it was explicitly stopped by the user
@@ -32,8 +33,11 @@ x-settings:
     - NO_PROXY="*"
   # Attach the container to the project network defined in the network.yml file
   networks:
-    - ${COMPOSE_PROJECT_NAME}-network
-  <<: *labels # Apply the common labels to the container
+    default:
+      aliases:
+        - ${COMPOSE_PROJECT_NAME}-network
+  # Apply the common labels to the container
+  <<: *labels
 
 # Define a base service that other services can inherit from
 services:

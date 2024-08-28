@@ -14,7 +14,7 @@
 ######################################################################
 
 # Array of services to bring up. Add more services here as needed.
-services=("tiledb")
+services=("base")
 
 # Base Docker Compose command, broken into multiple lines for readability.
 cmd=(
