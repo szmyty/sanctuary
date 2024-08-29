@@ -13,57 +13,19 @@
 # @Version      : 1.0
 ######################################################################
 
-# Use a base image, for example, Debian or Ubuntu
-FROM debian:latest
+# Image name to use.
+ARG BASE_IMAGE_NAME=base
 
-# Set the shell options for safer script execution
-SHELL ["/bin/bash", "-o", "errexit", "-o", "errtrace", "-o", "functrace", "-o", "nounset", "-o", "pipefail", "-c"]
+# Image version to use.
+ARG BASE_IMAGE_VERSION=latest
 
-# Ensure the build process uses the root user
+# Project name.
+ARG PROJECT_NAME=sanctuary
+
+# Use a base image.
+FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}
+
+# Ensure the build process uses the root user.
 USER root
 
-# Set environment variables for SANCTUARY_HOME, SANCTUARY_BIN, and SANCTUARY_CONFIG
-ENV SANCTUARY_HOME=/sanctuary
-ENV SANCTUARY_BIN=${SANCTUARY_HOME}/bin
-ENV SANCTUARY_CONFIG=${SANCTUARY_HOME}/config
 
-# Copy apt.conf and dpkg.cfg to their respective locations
-COPY apt.conf /etc/apt/apt.conf.d/99custom-apt.conf
-COPY dpkg.cfg /etc/dpkg/dpkg.cfg.d/99custom-dpkg.cfg
-
-# Copy the package list to the container
-COPY package.list /tmp/package.list
-
-# Update package lists and install packages from package.list
-RUN apt-get update \
-    && xargs -a /tmp/package.list apt-get install \
-    && rm -rf /var/lib/apt/lists/*
-
-# Optionally remove the package list file after installation
-RUN rm /tmp/package.list
-
-# Create a non-root user with specific configurations
-RUN groupadd \
-    --gid ${SANCTUARY_GID} \
-    ${SANCTUARY_GROUP} \
-    && useradd \
-    --no-log-init \
-    --create-home \
-    --uid ${SANCTUARY_UID} \
-    --gid ${SANCTUARY_GID} \
-    --comment "Non-root User for Running Applications" \
-    --home /home/${SANCTUARY_USER} \
-    --skel /etc/skel \
-    --shell /sbin/nologin \
-    # --expiredate 2025-12-31 \
-    ${SANCTUARY_USER}
-
-# Copy the scripts from the local bin directory to the container's bin directory
-COPY bin ${SANCTUARY_BIN}
-
-# Make sure the scripts are executable
-RUN chmod +x ${SANCTUARY_BIN}/*
-
-RUN ${SANCTUARY_BIN}/script1.sh
-RUN ${SANCTUARY_BIN}/script2.sh
-RUN ${SANCTUARY_BIN}/script3.sh

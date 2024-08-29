@@ -28,7 +28,7 @@
         "workbench.settings.editor": "ui",
         "explorer.autoReveal": "focusNoScroll",
         "explorer.compactFolders": true,
-        "explorer.confirmDragAndDrop": true,
+        "explorer.confirmDragAndDrop": false,
         "explorer.confirmPasteNative": true,
         "explorer.confirmUndo": "default",
         "explorer.excludeGitIgnore": false,

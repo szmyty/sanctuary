@@ -18,6 +18,7 @@ git
 wget
 locales
 ca-certificates
+cmake
 
 # Networking tools
 net-tools
