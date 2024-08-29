@@ -16,7 +16,7 @@
 # docker compose --file sanctuary.yml --env-file sanctuary.env --env-file containers/base/base.env --parallel 1 --ansi always build base
 
 # Array of services to bring up. Add more services here as needed.
-services=("redis")
+services=("tiledb")
 
 # Base Docker Compose command, broken into multiple lines for readability.
 cmd=(
@@ -25,6 +25,7 @@ cmd=(
   "--env-file" "sanctuary.env"
   "--env-file" "containers/base/base.env"
   "--env-file" "containers/redis/redis.env"
+  "--env-file" "containers/tiledb/tiledb.env"
   "--parallel" "1"
   "--ansi" "always"
   "up"

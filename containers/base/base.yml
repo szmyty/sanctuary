@@ -16,7 +16,8 @@ services:
     build:
       context: .
       dockerfile: base.Dockerfile
+      target: base
       args:
-        - DEBIAN_IMAGE_VERSION=${DEBIAN_IMAGE_VERSION:-bullseye-20240812}
+        - DEBIAN_IMAGE_VERSION=${DEBIAN_IMAGE_VERSION:-bookworm-20240812}
     env_file:
       - base.env

@@ -25,6 +25,6 @@ include:
     project_directory: ${CONTAINERS_ROOT}/redis
     env_file: ${CONTAINERS_ROOT}/redis/redis.env
   # Path to the TileDB service Docker Compose file
-  # - path: ${CONTAINERS_ROOT}/tiledb/tiledb.yml
-  #   project_directory: ${CONTAINERS_ROOT}/tiledb
-  #   env_file: ${CONTAINERS_ROOT}/tiledb/tiledb.env
+  - path: ${CONTAINERS_ROOT}/tiledb/tiledb.yml
+    project_directory: ${CONTAINERS_ROOT}/tiledb
+    env_file: ${CONTAINERS_ROOT}/tiledb/tiledb.env

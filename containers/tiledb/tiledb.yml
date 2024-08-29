@@ -1,0 +1,48 @@
+---
+# Define common labels for Docker objects.
+x-labels: &labels
+  labels:
+    # Name of the application, set using the Compose project name.
+    app.name: ${COMPOSE_PROJECT_NAME}
+
+services:
+  tiledb:
+    extends:
+      file: ../common.yml
+      service: common
+    depends_on:
+      - base
+    pull_policy: missing
+    hostname: ${COMPOSE_PROJECT_NAME}.${TILEDB_HOSTNAME}
+    container_name: ${COMPOSE_PROJECT_NAME}-${TILEDB_HOSTNAME}
+    image: ${COMPOSE_PROJECT_NAME}/${TILEDB_IMAGE_NAME}:${TILEDB_IMAGE_TAG}
+    build:
+      context: .
+      dockerfile: tiledb.Dockerfile
+      args:
+        - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+        - BASE_IMAGE_NAME=${BASE_IMAGE_NAME}
+        - BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION}
+        - TILEDB_VER_MAJOR=${TILEDB_VER_MAJOR}
+        - TILEDB_VER_MINOR=${TILEDB_VER_MINOR}
+        - TILEDB_VER_PATCH=${TILEDB_VER_PATCH}
+        - TILEDB_DOWNLOAD_URL=${TILEDB_DOWNLOAD_URL}
+        - TILEDB_DOWNLOAD_SHA=${TILEDB_DOWNLOAD_SHA}
+        - TILEDB_PORT=${TILEDB_PORT}
+        - TILEDB_DATA_DIR=${TILEDB_DATA_DIR}
+    ports:
+      - "${TILEDB_EXPOSED_PORT}:${TILEDB_PORT}"
+    volumes:
+      - ${TILEDB_DATA_VOLUME}:${TILEDB_DATA_DIR}
+    networks:
+      default:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}.${TILEDB_HOSTNAME}
+    env_file:
+      - tiledb.env
+
+volumes:
+  tiledb_data:
+    name: ${TILEDB_DATA_VOLUME}
+    driver: local
+    <<: [*labels]

@@ -17,8 +17,18 @@ curl
 git
 wget
 locales
+locales-all
 ca-certificates
 cmake
+autoconf
+make
+g++
+gcc
+vim
+xz-utils
+mlocate
+unzip
+file
 libzstd-dev
 libbz2-dev
 liblz4-dev
@@ -32,7 +42,10 @@ libgstreamer-plugins-base1.0-dev
 libgstreamer1.0-dev
 libjsoncpp-dev
 libxml2-dev
+libc-dev
 libboost-all-dev
+dpkg-dev
+
 
 # Networking tools
 net-tools
@@ -46,6 +59,7 @@ strace
 lsof
 vim
 clang
+# clang++
 
 # Version control and SCM
 subversion

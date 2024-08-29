@@ -13,19 +13,16 @@
 # @Version      : 1.0
 ######################################################################
 
-# Image version to use.
-ARG DEBIAN_IMAGE_VERSION=bullseye-20240812
-
-# Using the official Debian image as base.
-# https://hub.docker.com/_/debian
-FROM debian:${DEBIAN_IMAGE_VERSION}
+# Stage 1: Base Image Setup
+ARG DEBIAN_IMAGE_VERSION=bookworm-20240812
+FROM debian:${DEBIAN_IMAGE_VERSION} AS dependencies
 
 # Arguments with default values.
-ARG SANCTUARY_USER=${SANCTUARY_USER:-sanctuary}
-ARG SANCTUARY_GROUP=${SANCTUARY_GROUP:-sanctuary}
-ARG SANCTUARY_UID=${SANCTUARY_UID:-65532}
-ARG SANCTUARY_GID=${SANCTUARY_GID:-65532}
-ARG SANCTUARY_HOME=/sanctuary
+ARG SANCTUARY_USER=sanctuary
+ARG SANCTUARY_GROUP=sanctuary
+ARG SANCTUARY_UID=65532
+ARG SANCTUARY_GID=65532
+ARG SANCTUARY_HOME=/home/${SANCTUARY_USER}
 ARG SANCTUARY_BIN=${SANCTUARY_HOME}/bin
 ARG SANCTUARY_CONFIG=${SANCTUARY_HOME}/config
 
@@ -43,34 +40,15 @@ ENV BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} \
     DEBIAN_PRIORITY=critical \
     DEBCONF_NOWARNINGS=yes \
     TERM=xterm-256color \
-    LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8 \
-    LANGUAGE=C.UTF-8 \
-    LC_CTYPE=C.UTF-8 \
-    LC_COLLATE=C.UTF-8 \
-    LC_NUMERIC=C.UTF-8 \
-    LC_TIME=C.UTF-8 \
-    LC_MONETARY=C.UTF-8 \
-    LC_MESSAGES=C.UTF-8 \
-    LC_PAPER=C.UTF-8 \
-    LC_NAME=C.UTF-8 \
-    LC_ADDRESS=C.UTF-8 \
-    LC_TELEPHONE=C.UTF-8 \
-    LC_MEASUREMENT=C.UTF-8 \
-    LC_IDENTIFICATION=C.UTF-8 \
     APT_LISTCHANGES_FRONTEND=none \
-    APT_LISTBUGS_FRONTEND=none
-
-# Set the shell options for safer script execution.
-SHELL ["/bin/bash", "-o", "errexit", "-o", "errtrace", "-o", "functrace", "-o", "nounset", "-o", "pipefail", "-c"]
+    APT_LISTBUGS_FRONTEND=none \
+    TMPDIR=/tmp
 
 # Ensure the build process uses the root user.
 USER root
 
-# Set environment variables for SANCTUARY_HOME, SANCTUARY_BIN, and SANCTUARY_CONFIG.
-ENV SANCTUARY_HOME=/home/${SANCTUARY_USER}
-ENV SANCTUARY_BIN=${SANCTUARY_HOME}/bin
-ENV SANCTUARY_CONFIG=${SANCTUARY_HOME}/config
+# Set safer shell options for script execution.
+SHELL ["/bin/bash", "-o", "errexit", "-o", "errtrace", "-o", "functrace", "-o", "nounset", "-o", "pipefail", "-c"]
 
 # Set the working directory to the sanctuary home directory.
 WORKDIR ${SANCTUARY_HOME}
@@ -82,7 +60,7 @@ COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99custom-dpkg.cfg
 # Copy the package list to the container.
 COPY package.list /tmp/package.list
 
-# Run apt-config dump to log the current configuration.
+# Log the current APT configuration.
 RUN apt-config dump > /var/log/apt-config.log
 
 # Optional: Display the log file (for CI/CD or debugging purposes).
@@ -90,16 +68,23 @@ RUN cat /var/log/apt-config.log
 
 # Install the packages listed in package.list, ignoring comments and empty lines.
 RUN apt-get update && \
-    apt-get install $(grep --invert-match --extended-regexp '^\s*(#|$)' /tmp/package.list) && \
+    apt-get install --yes $(grep --invert-match --extended-regexp '^\s*(#|$)' /tmp/package.list) && \
     rm -rf /var/lib/apt/lists/*
 
-# Install the required package for locale settings.
-RUN apt-get update && apt-get install -y locales \
-    && echo "${LANG} UTF-8" > /etc/locale.gen \
-    && locale-gen "${LANG}"
+# Stage 2: Building the Base Image
+FROM dependencies as base
 
-# Set the locale using the environment variables.
-RUN update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
+# Set locale settings if necessary (commented out but kept for reference)
+# ENV LANG=en_US.UTF-8
+# ENV LANGUAGE=en_US:en
+# ENV LC_ALL=en_US.UTF-8
+
+# Uncomment if locale configuration is needed
+# RUN apt-get update && apt-get install -y locales \
+#     && echo "${LANG} UTF-8" > /etc/locale.gen \
+#     && locale-gen "${LANG}" && \
+#     dpkg-reconfigure --frontend=noninteractive locales && \
+#     update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
 
 # Create a non-root user with specific configurations.
 RUN groupadd \
@@ -112,7 +97,7 @@ RUN groupadd \
     --comment "Non-root User for Running Applications" \
     --home ${SANCTUARY_HOME} \
     --skel /etc/skel \
-    --shell /sbin/nologin \
+    --shell /bin/bash \
     ${SANCTUARY_USER}
 
 # Copy the scripts from the local bin directory to the container's bin directory.
@@ -124,4 +109,5 @@ RUN chmod +x ${SANCTUARY_BIN}/*
 # Switch to the non-root user.
 USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
 
-ENTRYPOINT [ "tail", "-f", "/dev/null" ]
+# Set Bash as the entry point to keep the container running.
+ENTRYPOINT [ "bash", "-c", "tail -f /dev/null" ]
