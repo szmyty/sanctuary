@@ -19,6 +19,20 @@ wget
 locales
 ca-certificates
 cmake
+libzstd-dev
+libbz2-dev
+liblz4-dev
+zlib1g-dev
+libcurl4-openssl-dev
+libssl-dev
+uuid-dev
+zlib1g-dev
+libpulse-dev
+libgstreamer-plugins-base1.0-dev
+libgstreamer1.0-dev
+libjsoncpp-dev
+libxml2-dev
+libboost-all-dev
 
 # Networking tools
 net-tools
@@ -31,6 +45,7 @@ gdb
 strace
 lsof
 vim
+clang
 
 # Version control and SCM
 subversion
