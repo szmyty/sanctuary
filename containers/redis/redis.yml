@@ -8,7 +8,7 @@ x-labels: &labels
 services:
   redis:
     extends:
-      file: ../common.yml
+      file: ../base/base.yml
       service: base
     hostname: ${COMPOSE_PROJECT_NAME}.${REDIS_HOSTNAME}
     container_name: ${COMPOSE_PROJECT_NAME}-${REDIS_HOSTNAME}
@@ -17,10 +17,14 @@ services:
       context: .
       dockerfile: redis.Dockerfile
       args:
+        - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+        - BASE_IMAGE_NAME=${BASE_IMAGE_NAME}
+        - BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION}
         - REDIS_VERSION=${REDIS_VERSION}
         - REDIS_DOWNLOAD_URL=${REDIS_DOWNLOAD_URL}
         - REDIS_DOWNLOAD_SHA=${REDIS_DOWNLOAD_SHA}
         - REDIS_PORT=${REDIS_PORT}
+        - REDIS_DATA_DIR=${REDIS_DATA_DIR}
     ports:
       - "${REDIS_EXPOSED_PORT}:${REDIS_PORT}"
     volumes:

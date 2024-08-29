@@ -14,13 +14,15 @@
 ######################################################################
 
 # Array of services to bring up. Add more services here as needed.
-services=("base")
+services=("redis")
 
 # Base Docker Compose command, broken into multiple lines for readability.
 cmd=(
   "docker" "compose"
   "--file" "sanctuary.yml"
   "--env-file" "sanctuary.env"
+  "--env-file" "containers/base/base.env"
+  "--env-file" "containers/redis/redis.env"
   "--parallel" "1"
   "--ansi" "always"
   "up"

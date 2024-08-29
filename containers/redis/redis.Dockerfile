@@ -13,19 +13,25 @@
 # @Version      : 1.0
 ######################################################################
 
+# Project name.
+ARG PROJECT_NAME=sanctuary
+
 # Image name to use.
 ARG BASE_IMAGE_NAME=base
 
 # Image version to use.
 ARG BASE_IMAGE_VERSION=latest
 
-# Project name.
-ARG PROJECT_NAME=sanctuary
+ARG REDIS_VERSION=6.2.6
+ARG REDIS_DOWNLOAD_URL=http://download.redis.io/releases/redis-${REDIS_VERSION}.tar.gz
+ARG REDIS_DOWNLOAD_SHA=
+ARG REDIS_PORT=6379
+ARG REDIS_DATA_DIR=
 
 # Use a base image.
 FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}
 
 # Ensure the build process uses the root user.
-USER root
+# USER root
 
 

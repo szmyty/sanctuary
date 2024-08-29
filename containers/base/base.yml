@@ -9,7 +9,7 @@ services:
   base:
     extends:
       file: ../common.yml
-      service: base
+      service: common
     hostname: ${COMPOSE_PROJECT_NAME}.${BASE_HOSTNAME}
     container_name: ${COMPOSE_PROJECT_NAME}-${BASE_HOSTNAME}
     image: ${COMPOSE_PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}

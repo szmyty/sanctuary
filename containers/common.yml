@@ -39,8 +39,8 @@ x-settings:
   # Apply the common labels to the container
   <<: *labels
 
-# Define a base service that other services can inherit from
+# Define a common service that other services can inherit from.
 services:
-  base:
+  common:
     # Inherit all common settings defined above
     <<: *settings
