@@ -25,6 +25,9 @@ ARG SANCTUARY_GID=65532
 ARG SANCTUARY_HOME=/home/${SANCTUARY_USER}
 ARG SANCTUARY_BIN=${SANCTUARY_HOME}/bin
 ARG SANCTUARY_CONFIG=${SANCTUARY_HOME}/config
+ARG LANG=en_US.UTF-8
+ARG LANGUAGE=en_US:en
+ARG TZ=UTC
 
 # Set environment variables.
 ENV BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} \
@@ -42,7 +45,10 @@ ENV BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} \
     TERM=xterm-256color \
     APT_LISTCHANGES_FRONTEND=none \
     APT_LISTBUGS_FRONTEND=none \
-    TMPDIR=/tmp
+    TMPDIR=/tmp \
+    LANG=${LANG} \
+    LANGUAGE=${LANGUAGE} \
+    TZ=${TZ}
 
 # Ensure the build process uses the root user.
 USER root
@@ -85,6 +91,13 @@ RUN apt-config dump > /var/log/apt-config.log
 
 # Optional: Display the log file (for CI/CD or debugging purposes).
 RUN cat /var/log/apt-config.log
+
+RUN "${SANCTUARY_BIN}/tools/configure_locale.sh"
+RUN "${SANCTUARY_BIN}/tools/set_timezone.sh"
+
+RUN apt-get update \
+    && apt-get install \
+    ca-certificates
 
 # Install the packages listed in package.list, ignoring comments and empty lines.
 # RUN /bin/bash -c "${SANCTUARY_BIN}/tools/apt_install_package_list.sh /tmp/package.list"
@@ -141,18 +154,6 @@ RUN cat /var/log/apt-config.log
 
 # Stage 2: Building the Base Image
 FROM dependencies as base
-
-# Set locale settings.
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
-
-# Uncomment if locale configuration is needed
-RUN apt-get update && apt-get install -y locales \
-    && echo "${LANG} UTF-8" > /etc/locale.gen \
-    && locale-gen "${LANG}" && \
-    dpkg-reconfigure --frontend=noninteractive locales && \
-    update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
 
 # Switch to the non-root user.
 USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}

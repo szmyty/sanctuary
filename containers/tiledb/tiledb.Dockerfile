@@ -121,7 +121,7 @@ USER root
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential make language-pack-en-base cmake git libssl-dev libbz2-dev liblz4-dev libzstd-dev \
+    build-essential make cmake git libssl-dev libbz2-dev liblz4-dev libzstd-dev \
     libsnappy-dev libblosc-dev liblzma-dev libcurl4-openssl-dev \
     libjemalloc-dev libtbb-dev libtbb-dev libtiff-dev \
     libz-dev libboost-all-dev ca-certificates clang-format clang-tidy && \
