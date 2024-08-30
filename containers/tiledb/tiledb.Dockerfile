@@ -27,6 +27,21 @@ ARG TILEDB_DATA_DIR=
 # Use a base image.
 FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}
 
+ENV AWS_EC2_METADATA_DISABLED=true
+ARG TILEDB_VER_MAJOR
+ENV TILEDB_VER_MAJOR=${TILEDB_VER_MAJOR:-2}
+ARG TILEDB_VER_MINOR
+ENV TILEDB_VER_MINOR=${TILEDB_VER_MINOR:-25}
+ARG TILEDB_VER_PATCH
+ENV TILEDB_VER_PATCH=${TILEDB_VER_PATCH:-0}
+
+ENV TILEDB_VER="${TILEDB_VER_MAJOR}.${TILEDB_VER_MINOR}"
+ENV TILEDB_VERSION="${TILEDB_VER}.${TILEDB_VER_PATCH}"
+ENV TILEDB_REPO_URL="https://github.com/TileDB-Inc/TileDB.git"
+
+# Optional components to enable (defaults to empty).
+ARG enable=
+
 # Ensure the build process uses the root user.
 USER root
 
@@ -58,21 +73,9 @@ USER root
 #     cmake --install . --config=Release && \
 #     rm -rf /tmp/aws-sdk-cpp
 
-ARG TILEDB_VER_MAJOR
-ENV TILEDB_VER_MAJOR=${TILEDB_VER_MAJOR:-2}
-ARG TILEDB_VER_MINOR
-ENV TILEDB_VER_MINOR=${TILEDB_VER_MINOR:-25}
-ARG TILEDB_VER_PATCH
-ENV TILEDB_VER_PATCH=${TILEDB_VER_PATCH:-0}
 
-ENV TILEDB_VER="${TILEDB_VER_MAJOR}.${TILEDB_VER_MINOR}"
-ENV TILEDB_VERSION="${TILEDB_VER}.${TILEDB_VER_PATCH}"
-ENV TILEDB_REPO_URL="https://github.com/TileDB-Inc/TileDB.git"
 
-# Optional components to enable (defaults to empty).
-ARG enable=
-
-# # Install TileDB
+# Install TileDB
 # RUN wget -P /home/tiledb https://github.com/TileDB-Inc/TileDB/archive/${version}.tar.gz \
 #     && tar xzf /home/tiledb/${version}.tar.gz -C /home/tiledb \
 #     && rm /home/tiledb/${version}.tar.gz \
@@ -85,9 +88,16 @@ ARG enable=
 #     && make install-tiledb \
 #     && rm -rf /home/tiledb/TileDB-${version}
 
+RUN git clone https://github.com/Microsoft/vcpkg.git ${TMPDIR}/vcpkg \
+    && cd ${TMPDIR}/vcpkg \
+    && ./bootstrap-vcpkg.sh \
+    && ./vcpkg install aws-sdk-cpp[core,s3] \
+    && rm -rf ${TMPDIR}/vcpkg
+WORKDIR /home/vcpkg
+RUN ./bootstrap-vcpkg.sh
+
 # Build TileDB.
-RUN export CMAKE_MAKE_PROGRAM=$(which make) \
-    && git config --global advice.detachedHead false \
+RUN git config --global advice.detachedHead false \
     && git clone \
     --quiet \
     --depth 1 \
@@ -96,18 +106,17 @@ RUN export CMAKE_MAKE_PROGRAM=$(which make) \
     --branch ${TILEDB_VERSION} \
     ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
     && cd ${TMPDIR}/tiledb \
-    && mkdir build
-# && cd build \
-# # && CXX=clang++ CC=clang \
-# && CMAKE_MAKE_PROGRAM=$(which make) \
-# && CMAKE_GENERATOR="Unix Makefiles" \
-# && ../bootstrap \
-# --prefix=/usr/local \
-# --enable-s3 \
-# --enable-serialization \
-# --enable=${enable} \
-# && make ${BUILD_CORES:-$(nproc)} \
-# && make install-tiledb \
-# && rm -rf ${TMPDIR}/tiledb
+    && mkdir build \
+    && cd build \
+    # && CXX=clang++ CC=clang \
+    # && CMAKE_MAKE_PROGRAM=$(which make) \
+    # && CMAKE_GENERATOR="Unix Makefiles" \
+    && ../bootstrap \
+    --prefix=/usr/local \
+    --enable-s3 \
+    --enable-serialization \
+    && make ${BUILD_CORES:-$(nproc)} \
+    && make install-tiledb \
+    && rm -rf ${TMPDIR}/tiledb
 
 ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"

@@ -50,42 +50,6 @@ USER root
 # Set safer shell options for script execution.
 SHELL ["/bin/bash", "-o", "errexit", "-o", "errtrace", "-o", "functrace", "-o", "nounset", "-o", "pipefail", "-c"]
 
-# Set the working directory to the sanctuary home directory.
-WORKDIR ${SANCTUARY_HOME}
-
-# Copy apt.conf and dpkg.cfg to their respective locations.
-COPY config/apt.conf /etc/apt/apt.conf.d/99custom-apt.conf
-COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99custom-dpkg.cfg
-
-# Copy the package list to the container.
-COPY package.list /tmp/package.list
-
-# Log the current APT configuration.
-RUN apt-config dump > /var/log/apt-config.log
-
-# Optional: Display the log file (for CI/CD or debugging purposes).
-RUN cat /var/log/apt-config.log
-
-# Install the packages listed in package.list, ignoring comments and empty lines.
-RUN apt-get update && \
-    apt-get install --yes $(grep --invert-match --extended-regexp '^\s*(#|$)' /tmp/package.list) && \
-    rm -rf /var/lib/apt/lists/*
-
-# Stage 2: Building the Base Image
-FROM dependencies as base
-
-# Set locale settings if necessary (commented out but kept for reference)
-# ENV LANG=en_US.UTF-8
-# ENV LANGUAGE=en_US:en
-# ENV LC_ALL=en_US.UTF-8
-
-# Uncomment if locale configuration is needed
-# RUN apt-get update && apt-get install -y locales \
-#     && echo "${LANG} UTF-8" > /etc/locale.gen \
-#     && locale-gen "${LANG}" && \
-#     dpkg-reconfigure --frontend=noninteractive locales && \
-#     update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
-
 # Create a non-root user with specific configurations.
 RUN groupadd \
     --gid ${SANCTUARY_GID} ${SANCTUARY_GROUP} \
@@ -100,11 +64,95 @@ RUN groupadd \
     --shell /bin/bash \
     ${SANCTUARY_USER}
 
+# Set the working directory to the sanctuary home directory.
+WORKDIR ${SANCTUARY_HOME}
+
 # Copy the scripts from the local bin directory to the container's bin directory.
 COPY --chown=${SANCTUARY_USER}:${SANCTUARY_GROUP} bin ${SANCTUARY_BIN}
 
 # Make sure the scripts are executable.
-RUN chmod +x ${SANCTUARY_BIN}/*
+RUN chmod --recursive +x ${SANCTUARY_BIN}/*
+
+# Copy apt.conf and dpkg.cfg to their respective locations.
+COPY config/apt.conf /etc/apt/apt.conf.d/99custom-apt.conf
+COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99custom-dpkg.cfg
+
+# Copy the package list to the container.
+COPY package.list /${TMPDIR}/package.list
+
+# Log the current APT configuration.
+RUN apt-config dump > /var/log/apt-config.log
+
+# Optional: Display the log file (for CI/CD or debugging purposes).
+RUN cat /var/log/apt-config.log
+
+# Install the packages listed in package.list, ignoring comments and empty lines.
+# RUN /bin/bash -c "${SANCTUARY_BIN}/tools/apt_install_package_list.sh /tmp/package.list"
+RUN apt-get update \
+    && apt-get install -y \
+    ca-certificates \
+    gosu \
+    pwgen \
+    tzdata \
+    gcc \
+    gcc-multilib \
+    g++ \
+    build-essential \
+    bison \
+    chrpath \
+    make \
+    cmake \
+    gdb \
+    lz4 \
+    zstd \
+    zip \
+    gnutls-dev \
+    libaio-dev \
+    libboost-dev \
+    libdbd-mysql \
+    libjudy-dev \
+    libncurses5-dev \
+    libpam0g-dev \
+    libpcre3-dev \
+    libreadline-dev \
+    libstemmer-dev \
+    libssl-dev \
+    libnuma-dev \
+    libxml2-dev \
+    lsb-release \
+    perl \
+    psmisc \
+    zlib1g-dev \
+    libcrack2-dev \
+    cracklib-runtime \
+    libjemalloc-dev \
+    libsnappy-dev \
+    liblzma-dev \
+    libzmq3-dev \
+    uuid-dev \
+    ccache \
+    git \
+    wget \
+    bzip2 \
+    zlib \
+    libcurl4-openssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# Stage 2: Building the Base Image
+FROM dependencies as base
+
+# Set locale settings.
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+# Uncomment if locale configuration is needed
+# RUN apt-get update && apt-get install -y locales \
+#     && echo "${LANG} UTF-8" > /etc/locale.gen \
+#     && locale-gen "${LANG}" && \
+#     dpkg-reconfigure --frontend=noninteractive locales && \
+#     update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
 
 # Switch to the non-root user.
 USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
