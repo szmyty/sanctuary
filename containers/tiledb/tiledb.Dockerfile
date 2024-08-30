@@ -42,6 +42,8 @@ ENV TILEDB_REPO_URL="https://github.com/TileDB-Inc/TileDB.git"
 # Optional components to enable (defaults to empty).
 ARG enable=
 
+ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+
 # Ensure the build process uses the root user.
 USER root
 
@@ -120,13 +122,17 @@ USER root
 # && rm -rf ${TMPDIR}/tiledb
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential make cmake git libssl-dev libbz2-dev liblz4-dev libzstd-dev \
-    libsnappy-dev libblosc-dev liblzma-dev libcurl4-openssl-dev \
-    libjemalloc-dev libtbb-dev libtbb-dev libtiff-dev \
-    libz-dev libboost-all-dev ca-certificates clang-format clang-tidy && \
-    rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y \
+#     libsnappy-dev libblosc-dev liblzma-dev libcurl4-openssl-dev \
+#     libjemalloc-dev libtbb-dev libtbb-dev libtiff-dev \
+#     libz-dev libboost-all-dev ca-certificates clang-format clang-tidy && \
+#     rm -rf /var/lib/apt/lists/*
 
+
+
+
+# https://github.com/TileDB-Inc/TileDB/blob/dev/doc/dev/BUILD.md
+# https://github.com/TileDB-Inc/TileDB/blob/dev/cmake/Options/BuildOptions.cmake
 # RUN git config --global advice.detachedHead false \
 #     && git clone \
 #     --quiet \

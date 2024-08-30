@@ -80,8 +80,8 @@ COPY --chown=${SANCTUARY_USER}:${SANCTUARY_GROUP} bin ${SANCTUARY_BIN}
 RUN chmod --recursive +x ${SANCTUARY_BIN}/*
 
 # Copy apt.conf and dpkg.cfg to their respective locations.
-COPY config/apt.conf /etc/apt/apt.conf.d/99custom-apt.conf
-COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99custom-dpkg.cfg
+COPY config/apt.conf /etc/apt/apt.conf.d/99docker-apt.conf
+COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99docker-dpkg.cfg
 
 # Copy the package list to the container.
 COPY package.list /${TMPDIR}/package.list
@@ -92,65 +92,36 @@ RUN apt-config dump > /var/log/apt-config.log
 # Optional: Display the log file (for CI/CD or debugging purposes).
 RUN cat /var/log/apt-config.log
 
-RUN "${SANCTUARY_BIN}/tools/configure_locale.sh"
-RUN "${SANCTUARY_BIN}/tools/set_timezone.sh"
+# Configure the locale and timezone.
+RUN apt-get update \
+    && apt-get install \
+    locales=2.36-9+deb12u7 \
+    locales-all=2.36-9+deb12u7 \
+    && rm -rf /var/lib/apt/lists/* \
+    && "${SANCTUARY_BIN}/tools/configure_locale.sh" \
+    && "${SANCTUARY_BIN}/tools/set_timezone.sh"
 
 RUN apt-get update \
     && apt-get install \
-    ca-certificates
-
-# Install the packages listed in package.list, ignoring comments and empty lines.
-# RUN /bin/bash -c "${SANCTUARY_BIN}/tools/apt_install_package_list.sh /tmp/package.list"
-# RUN apt-get update \
-#     && apt-get install -y \
-#     ca-certificates \
-#     gosu \
-#     pwgen \
-#     tzdata \
-#     gcc \
-#     gcc-multilib \
-#     g++ \
-# build-essential \
-# bison \
-# chrpath \
-# make \
-# cmake \
-# gdb \
-# lz4 \
-# zstd \
-# zip \
-# gnutls-dev \
-# libaio-dev \
-# libboost-dev \
-# libdbd-mysql \
-# libjudy-dev \
-# libncurses5-dev \
-# libpam0g-dev \
-# libpcre3-dev \
-# libreadline-dev \
-# libstemmer-dev \
-# libssl-dev \
-# libnuma-dev \
-# libxml2-dev \
-# lsb-release \
-# perl \
-# psmisc \
-# zlib1g-dev \
-# libcrack2-dev \
-# cracklib-runtime \
-# libjemalloc-dev \
-# libsnappy-dev \
-# liblzma-dev \
-# libzmq3-dev \
-# uuid-dev \
-# ccache \
-# git \
-# wget \
-# bzip2 \
-# zlib \
-# libcurl4-openssl-dev \
-# && rm -rf /var/lib/apt/lists/*
-
+    ca-certificates=20230311 \
+    cmake=3.25.1-1 \
+    build-essential=12.9 \
+    git=1:2.39.2-1.1 \
+    libssl-dev=3.0.13-1~deb12u1 \
+    libbz2-dev=1.0.8-5+b1 \
+    liblz4-dev=1.9.4-1 \
+    libzstd-dev=1.5.4+dfsg2-5 \
+    zlib1g-dev=1:1.2.13.dfsg-1 \
+    libcurl4-openssl-dev=7.88.1-10+deb12u6 \
+    liblz4-dev=1.9.4-1 \
+    libbz2-dev=1.0.8-5+b1 \
+    libboost-all-dev=1.74.0.3 \
+    libblosc-dev=1.21.3+ds-1 \
+    zip=3.0-13 \
+    unzip=6.0-28 \
+    pkg-config=1.8.1-1 \
+    ninja-build=1.11.1-1 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Building the Base Image
 FROM dependencies as base
