@@ -88,35 +88,76 @@ USER root
 #     && make install-tiledb \
 #     && rm -rf /home/tiledb/TileDB-${version}
 
-RUN git clone https://github.com/Microsoft/vcpkg.git ${TMPDIR}/vcpkg \
-    && cd ${TMPDIR}/vcpkg \
-    && ./bootstrap-vcpkg.sh \
-    && ./vcpkg install aws-sdk-cpp[core,s3] \
-    && rm -rf ${TMPDIR}/vcpkg
-WORKDIR /home/vcpkg
-RUN ./bootstrap-vcpkg.sh
+# RUN git clone https://github.com/Microsoft/vcpkg.git ${TMPDIR}/vcpkg \
+#     && cd ${TMPDIR}/vcpkg \
+#     && ./bootstrap-vcpkg.sh \
+#     && ./vcpkg install aws-sdk-cpp[core,s3] \
+#     && rm -rf ${TMPDIR}/vcpkg
+# WORKDIR /home/vcpkg
+# RUN ./bootstrap-vcpkg.sh
 
 # Build TileDB.
-RUN git config --global advice.detachedHead false \
-    && git clone \
-    --quiet \
-    --depth 1 \
-    --shallow-submodules \
-    --recurse-submodules \
-    --branch ${TILEDB_VERSION} \
-    ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
-    && cd ${TMPDIR}/tiledb \
-    && mkdir build \
-    && cd build \
-    # && CXX=clang++ CC=clang \
-    # && CMAKE_MAKE_PROGRAM=$(which make) \
-    # && CMAKE_GENERATOR="Unix Makefiles" \
-    && ../bootstrap \
-    --prefix=/usr/local \
-    --enable-s3 \
-    --enable-serialization \
-    && make ${BUILD_CORES:-$(nproc)} \
-    && make install-tiledb \
-    && rm -rf ${TMPDIR}/tiledb
+# RUN git config --global advice.detachedHead false \
+#     && git clone \
+#     --quiet \
+#     --depth 1 \
+#     --shallow-submodules \
+#     --recurse-submodules \
+#     --branch ${TILEDB_VERSION} \
+#     ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
+#     && cd ${TMPDIR}/tiledb \
+#     && mkdir build \
+#     && cd build \
+# && CXX=clang++ CC=clang \
+# && CMAKE_MAKE_PROGRAM=$(which make) \
+# && CMAKE_GENERATOR="Unix Makefiles" \
+# && ../bootstrap \
+# --prefix=/usr/local \
+# --enable-s3 \
+# --enable-serialization \
+# && make ${BUILD_CORES:-$(nproc)} \
+# && make install-tiledb \
+# && rm -rf ${TMPDIR}/tiledb
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential make language-pack-en-base cmake git libssl-dev libbz2-dev liblz4-dev libzstd-dev \
+    libsnappy-dev libblosc-dev liblzma-dev libcurl4-openssl-dev \
+    libjemalloc-dev libtbb-dev libtbb-dev libtiff-dev \
+    libz-dev libboost-all-dev ca-certificates clang-format clang-tidy && \
+    rm -rf /var/lib/apt/lists/*
+
+# RUN git config --global advice.detachedHead false \
+#     && git clone \
+#     --quiet \
+#     --depth 1 \
+#     --shallow-submodules \
+#     --recurse-submodules \
+#     --branch ${TILEDB_VERSION} \
+#     ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
+#     && cd ${TMPDIR}/tiledb \
+#     && mkdir build \
+#     && cd build \
+#     && cmake .. -DCMAKE_BUILD_TYPE="Release" \
+#     -DCMAKE_INSTALL_PREFIX="/usr/local" \
+#     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
+#     -DCMAKE_CXX_COMPILER="/usr/bin/g++" \
+#     -DTILEDB_VERBOSE="ON" \
+#     -DTILEDB_HDFS="OFF" \
+#     -DTILEDB_S3="ON" \
+#     -DTILEDB_AZURE="OFF" \
+#     -DTILEDB_GCS="OFF" \
+#     -DTILEDB_SERIALIZATION="ON" \
+#     -DTILEDB_TOOLS="OFF" \
+#     -DTILEDB_WERROR="ON" \
+#     -DTILEDB_CPP_API="ON" \
+#     -DTILEDB_STATS="ON" \
+#     -DTILEDB_STATIC="OFF" \
+#     -DTILEDB_TESTS="ON" \
+#     -DTILEDB_CCACHE="OFF" \
+#     -DTILEDB_ARROW_TESTS="OFF" \
+#     -DTILEDB_FORCE_ALL_DEPS="OFF" && \
+#     make --jobs=$(nproc) && \
+#     make install
 
 ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"

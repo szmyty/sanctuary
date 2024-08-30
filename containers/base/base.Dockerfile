@@ -88,55 +88,55 @@ RUN cat /var/log/apt-config.log
 
 # Install the packages listed in package.list, ignoring comments and empty lines.
 # RUN /bin/bash -c "${SANCTUARY_BIN}/tools/apt_install_package_list.sh /tmp/package.list"
-RUN apt-get update \
-    && apt-get install -y \
-    ca-certificates \
-    gosu \
-    pwgen \
-    tzdata \
-    gcc \
-    gcc-multilib \
-    g++ \
-    build-essential \
-    bison \
-    chrpath \
-    make \
-    cmake \
-    gdb \
-    lz4 \
-    zstd \
-    zip \
-    gnutls-dev \
-    libaio-dev \
-    libboost-dev \
-    libdbd-mysql \
-    libjudy-dev \
-    libncurses5-dev \
-    libpam0g-dev \
-    libpcre3-dev \
-    libreadline-dev \
-    libstemmer-dev \
-    libssl-dev \
-    libnuma-dev \
-    libxml2-dev \
-    lsb-release \
-    perl \
-    psmisc \
-    zlib1g-dev \
-    libcrack2-dev \
-    cracklib-runtime \
-    libjemalloc-dev \
-    libsnappy-dev \
-    liblzma-dev \
-    libzmq3-dev \
-    uuid-dev \
-    ccache \
-    git \
-    wget \
-    bzip2 \
-    zlib \
-    libcurl4-openssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update \
+#     && apt-get install -y \
+#     ca-certificates \
+#     gosu \
+#     pwgen \
+#     tzdata \
+#     gcc \
+#     gcc-multilib \
+#     g++ \
+# build-essential \
+# bison \
+# chrpath \
+# make \
+# cmake \
+# gdb \
+# lz4 \
+# zstd \
+# zip \
+# gnutls-dev \
+# libaio-dev \
+# libboost-dev \
+# libdbd-mysql \
+# libjudy-dev \
+# libncurses5-dev \
+# libpam0g-dev \
+# libpcre3-dev \
+# libreadline-dev \
+# libstemmer-dev \
+# libssl-dev \
+# libnuma-dev \
+# libxml2-dev \
+# lsb-release \
+# perl \
+# psmisc \
+# zlib1g-dev \
+# libcrack2-dev \
+# cracklib-runtime \
+# libjemalloc-dev \
+# libsnappy-dev \
+# liblzma-dev \
+# libzmq3-dev \
+# uuid-dev \
+# ccache \
+# git \
+# wget \
+# bzip2 \
+# zlib \
+# libcurl4-openssl-dev \
+# && rm -rf /var/lib/apt/lists/*
 
 
 # Stage 2: Building the Base Image
@@ -148,11 +148,11 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 # Uncomment if locale configuration is needed
-# RUN apt-get update && apt-get install -y locales \
-#     && echo "${LANG} UTF-8" > /etc/locale.gen \
-#     && locale-gen "${LANG}" && \
-#     dpkg-reconfigure --frontend=noninteractive locales && \
-#     update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
+RUN apt-get update && apt-get install -y locales \
+    && echo "${LANG} UTF-8" > /etc/locale.gen \
+    && locale-gen "${LANG}" && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
 
 # Switch to the non-root user.
 USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
