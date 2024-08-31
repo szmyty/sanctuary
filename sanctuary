@@ -13,6 +13,33 @@
 # @Version      : 1.0
 ######################################################################
 
+# Function to check if the Docker buildx builder exists and create it if necessary
+ensure_buildx_builder() {
+    local _builder_name
+    _builder_name="$1"
+
+    # Check if the builder already exists
+    if docker buildx inspect "${_builder_name}" > /dev/null 2>&1; then
+        echo "Builder '${_builder_name}' already exists. Setting it as the default builder."
+    else
+        echo "Builder '${_builder_name}' does not exist. Creating and setting it as the default builder."
+        docker buildx create \
+            --name "${_builder_name}" \
+            --driver docker-container \
+            --use --bootstrap
+    fi
+
+    # Ensure the builder is being used
+    docker buildx use "${_builder_name}"
+}
+
+# Call the function
+# ensure_buildx_builder "container-builder"
+# docker context use default
+# docker buildx use default
+
+# echo "Builder: $(docker buildx inspect)"
+
 # docker compose --file sanctuary.yml --env-file sanctuary.env --env-file containers/base/base.env --parallel 1 --ansi always build base
 
 # Array of services to bring up. Add more services here as needed.

@@ -15,7 +15,11 @@
 
 # Stage 1: Base Image Setup
 ARG DEBIAN_IMAGE_VERSION=bookworm-20240812
+ARG PLATFORM=linux/amd64
+
 FROM debian:${DEBIAN_IMAGE_VERSION} AS dependencies
+
+# FROM --platform=${BUILDPLATFORM} debian:${DEBIAN_IMAGE_VERSION} AS dependencies
 
 # Arguments with default values.
 ARG SANCTUARY_USER=sanctuary
@@ -101,9 +105,11 @@ RUN apt-get update \
     && "${SANCTUARY_BIN}/tools/configure_locale.sh" \
     && "${SANCTUARY_BIN}/tools/set_timezone.sh"
 
+# TODO set versions per platform
 RUN apt-get update \
     && apt-get install \
     ca-certificates=20230311 \
+    curl=7.88.1-10+deb12u6 \
     cmake=3.25.1-1 \
     build-essential=12.9 \
     git=1:2.39.2-1.1 \
@@ -121,6 +127,15 @@ RUN apt-get update \
     unzip=6.0-28 \
     pkg-config=1.8.1-1 \
     ninja-build=1.11.1-1 \
+    clang-format=1:14.0-55.7~deb12u1 \
+    clang-tidy=1:14.0-55.7~deb12u1 \
+    doxygen=1.9.4-4 \
+    graphviz=2.42.2-7+b3 \
+    libpng-dev=1.6.39-2 \
+    libpng-tools=1.6.39-2 \
+    libtiff-dev=4.5.0-6+deb12u1 \
+    libtool=2.4.7-7~deb12u1 \
+    ccache=4.8+really4.7.5-1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Building the Base Image

@@ -36,6 +36,8 @@ x-settings:
     default:
       aliases:
         - ${COMPOSE_PROJECT_NAME}-network
+  init: true
+  pull_policy: missing
   # Apply the common labels to the container
   <<: *labels
 

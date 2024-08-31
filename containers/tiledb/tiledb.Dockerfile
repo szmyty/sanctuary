@@ -133,37 +133,50 @@ USER root
 
 # https://github.com/TileDB-Inc/TileDB/blob/dev/doc/dev/BUILD.md
 # https://github.com/TileDB-Inc/TileDB/blob/dev/cmake/Options/BuildOptions.cmake
-# RUN git config --global advice.detachedHead false \
-#     && git clone \
-#     --quiet \
-#     --depth 1 \
-#     --shallow-submodules \
-#     --recurse-submodules \
-#     --branch ${TILEDB_VERSION} \
-#     ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
-#     && cd ${TMPDIR}/tiledb \
-#     && mkdir build \
-#     && cd build \
-#     && cmake .. -DCMAKE_BUILD_TYPE="Release" \
-#     -DCMAKE_INSTALL_PREFIX="/usr/local" \
-#     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
-#     -DCMAKE_CXX_COMPILER="/usr/bin/g++" \
-#     -DTILEDB_VERBOSE="ON" \
-#     -DTILEDB_HDFS="OFF" \
-#     -DTILEDB_S3="ON" \
-#     -DTILEDB_AZURE="OFF" \
-#     -DTILEDB_GCS="OFF" \
-#     -DTILEDB_SERIALIZATION="ON" \
-#     -DTILEDB_TOOLS="OFF" \
-#     -DTILEDB_WERROR="ON" \
-#     -DTILEDB_CPP_API="ON" \
-#     -DTILEDB_STATS="ON" \
-#     -DTILEDB_STATIC="OFF" \
-#     -DTILEDB_TESTS="ON" \
-#     -DTILEDB_CCACHE="OFF" \
-#     -DTILEDB_ARROW_TESTS="OFF" \
-#     -DTILEDB_FORCE_ALL_DEPS="OFF" && \
-#     make --jobs=$(nproc) && \
-#     make install
+# https://dev.to/pgradot/just-in-case-debian-bookworm-comes-with-a-buggy-gcc-2e9b
+RUN git config --global advice.detachedHead false \
+    && git clone \
+    --quiet \
+    --depth 1 \
+    --shallow-submodules \
+    --recurse-submodules \
+    --branch ${TILEDB_VERSION} \
+    ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
+    && cd ${TMPDIR}/tiledb \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    -GNinja \
+    -DCOMPILER_SUPPORTS_AVX2=FALSE \
+    # -DTILEDB_VCPKG_BASE_TRIPLET="x64-linux" \
+    -DCMAKE_BUILD_TYPE="Release" \
+    -DCMAKE_INSTALL_PREFIX="/usr/local" \
+    -DTILEDB_REMOVE_DEPRECATIONS="OFF" \
+    -DTILEDB_VERBOSE="ON" \
+    -DTILEDB_S3="ON" \
+    -DTILEDB_AZURE="OFF" \
+    -DTILEDB_GCS="OFF" \
+    -DTILEDB_HDFS="OFF" \
+    -DTILEDB_WERROR="OFF" \
+    -DCMAKE_C_COMPILER="/usr/bin/gcc" \
+    -DCMAKE_CXX_COMPILER="/usr/bin/g++" \
+    -DTILEDB_ASSERTIONS="OFF" \
+    -DTILEDB_CPP_API="ON" \
+    -DTILEDB_STATS="ON" \
+    -DBUILD_SHARED_LIBS="ON" \
+    -DTILEDB_TESTS="ON" \
+    -DTILEDB_TOOLS="ON" \
+    -DTILEDB_SERIALIZATION="ON" \
+    -DTILEDB_CCACHE="ON" \
+    -DTILEDB_ARROW_TESTS="OFF" \
+    -DTILEDB_WEBP="ON" \
+    -DTILEDB_EXPERIMENTAL_FEATURES="OFF" \
+    -DTILEDB_TESTS_AWS_S3_CONFIG="OFF" \
+    -DTILEDB_DISABLE_AUTO_VCPKG="OFF"
+# && ninja --verbose -j1 all
+
+WORKDIR ${TMPDIR}/tiledb/build
+# make --jobs=$(nproc) && \
+# make install
 
 ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"

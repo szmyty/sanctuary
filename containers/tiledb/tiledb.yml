@@ -12,10 +12,10 @@ services:
       service: common
     depends_on:
       - base
-    pull_policy: missing
     hostname: ${COMPOSE_PROJECT_NAME}.${TILEDB_HOSTNAME}
     container_name: ${COMPOSE_PROJECT_NAME}-${TILEDB_HOSTNAME}
     image: ${COMPOSE_PROJECT_NAME}/${TILEDB_IMAGE_NAME}:${TILEDB_IMAGE_TAG}
+    # platform: linux/amd64
     build:
       context: .
       dockerfile: tiledb.Dockerfile
@@ -28,6 +28,9 @@ services:
         - TILEDB_VER_PATCH=${TILEDB_VER_PATCH}
         - TILEDB_PORT=${TILEDB_PORT}
         - TILEDB_DATA_DIR=${TILEDB_DATA_DIR}
+      # platforms:
+      # - "linux/arm64"
+      # - "linux/amd64"
     ports:
       - "${TILEDB_EXPOSED_PORT}:${TILEDB_PORT}"
     volumes:
