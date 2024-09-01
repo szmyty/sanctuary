@@ -109,16 +109,16 @@ RUN apt-get update \
 RUN apt-get update \
     && apt-get install \
     ca-certificates=20230311 \
-    curl=7.88.1-10+deb12u6 \
+    curl \
     cmake=3.25.1-1 \
     build-essential=12.9 \
     git=1:2.39.2-1.1 \
-    libssl-dev=3.0.13-1~deb12u1 \
+    libssl-dev \
     libbz2-dev=1.0.8-5+b1 \
     liblz4-dev=1.9.4-1 \
     libzstd-dev=1.5.4+dfsg2-5 \
     zlib1g-dev=1:1.2.13.dfsg-1 \
-    libcurl4-openssl-dev=7.88.1-10+deb12u6 \
+    libcurl4-openssl-dev \
     liblz4-dev=1.9.4-1 \
     libbz2-dev=1.0.8-5+b1 \
     libboost-all-dev=1.74.0.3 \
@@ -130,12 +130,14 @@ RUN apt-get update \
     clang-format=1:14.0-55.7~deb12u1 \
     clang-tidy=1:14.0-55.7~deb12u1 \
     doxygen=1.9.4-4 \
-    graphviz=2.42.2-7+b3 \
+    graphviz \
     libpng-dev=1.6.39-2 \
     libpng-tools=1.6.39-2 \
     libtiff-dev=4.5.0-6+deb12u1 \
     libtool=2.4.7-7~deb12u1 \
     ccache=4.8+really4.7.5-1 \
+    python3=3.11.2-1+b1 \
+    python3-dev=3.11.2-1+b1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Building the Base Image

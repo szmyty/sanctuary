@@ -3,15 +3,27 @@
 ######################################################################
 # @Project      : sanctuary
 # @File         : Dockerfile
-# @Description  : Dockerfile for building a secure and efficient container.
+# @Description  : Multi-stage Dockerfile for building TileDB and its Python bindings.
 #
-#
+# This Dockerfile is designed to build a secure and efficient container
+# with TileDB and TileDB-Py installed. It breaks down the build process
+# into multiple stages for better organization and smaller final image size.
 #
 # @Author       : Alan Szmyt
 # @Date         : 2024-08-23
 # @Version      : 1.0
+# @References   :
+#   - https://github.com/TileDB-Inc/TileDB-Docker/blob/master/release/Dockerfile
+#   - https://github.com/TileDB-Inc/TileDB-Docker/blob/master/base/Dockerfile
+#   - https://github.com/TileDB-Inc/TileDB/releases/tag/2.25.0
+#   - https://github.com/microsoft/vcpkg/blob/master/scripts/bootstrap.sh
+#   - https://github.com/GeorgeErickson/TileDB/blob/dev/doc/source/installation.rst
 ######################################################################
 
+######################################################################
+# Stage 1: Base Setup
+# This stage sets up the base environment with necessary packages and dependencies.
+######################################################################
 # Project name.
 ARG PROJECT_NAME=sanctuary
 
@@ -25,130 +37,57 @@ ARG TILEDB_PORT=6379
 ARG TILEDB_DATA_DIR=
 
 # Use a base image.
-FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}
+FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION} AS base
 
-ENV AWS_EC2_METADATA_DISABLED=true
-ARG TILEDB_VER_MAJOR
-ENV TILEDB_VER_MAJOR=${TILEDB_VER_MAJOR:-2}
-ARG TILEDB_VER_MINOR
-ENV TILEDB_VER_MINOR=${TILEDB_VER_MINOR:-25}
-ARG TILEDB_VER_PATCH
-ENV TILEDB_VER_PATCH=${TILEDB_VER_PATCH:-0}
+LABEL stage="base"
+LABEL description="Base stage with necessary dependencies for building TileDB."
 
-ENV TILEDB_VER="${TILEDB_VER_MAJOR}.${TILEDB_VER_MINOR}"
-ENV TILEDB_VERSION="${TILEDB_VER}.${TILEDB_VER_PATCH}"
-ENV TILEDB_REPO_URL="https://github.com/TileDB-Inc/TileDB.git"
+# Install required dependencies for the build.
+RUN apt-get update && apt-get install --yes \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    ninja-build \
+    python3-pip \
+    libsnappy-dev \
+    libblosc-dev \
+    liblzma-dev \
+    libcurl4-openssl-dev \
+    libjemalloc-dev \
+    libtbb-dev \
+    libtiff-dev \
+    libz-dev \
+    libboost-all-dev \
+    clang-format \
+    clang-tidy \
+    && rm -rf /var/lib/apt/lists/*
 
-# Optional components to enable (defaults to empty).
-ARG enable=
+######################################################################
+# Stage 2: Build TileDB
+# This stage clones the TileDB repository and builds it.
+######################################################################
+FROM base AS build-tiledb
 
-ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+LABEL stage="build-tiledb"
+LABEL description="Stage to build TileDB from source."
 
-# Ensure the build process uses the root user.
-USER root
+ARG TILEDB_VER_MAJOR=2
+ARG TILEDB_VER_MINOR=25
+ARG TILEDB_VER_PATCH=0
+ARG TILEDB_REPO_URL="https://github.com/TileDB-Inc/TileDB.git"
 
-# ARG AWS_SDK_CPP_VER_MAJOR
-# ENV AWS_SDK_CPP_VER_MAJOR ${AWS_SDK_CPP_VER_MAJOR:-1}
-# ARG AWS_SDK_CPP_VER_MINOR
-# ENV AWS_SDK_CPP_VER_MINOR ${AWS_SDK_CPP_VER_MINOR:-11}
-# ARG AWS_SDK_CPP_VER_PATCH
-# ENV AWS_SDK_CPP_VER_PATCH ${AWS_SDK_CPP_VER_PATCH:-394}
+ENV TILEDB_VERSION="${TILEDB_VER_MAJOR}.${TILEDB_VER_MINOR}.${TILEDB_VER_PATCH}"
 
-# ENV AWS_SDK_CPP_VER "${AWS_SDK_CPP_VER_MAJOR}.${AWS_SDK_CPP_VER_MINOR}"
-# ENV AWS_SDK_CPP_VERSION "${AWS_SDK_CPP_VER}.${AWS_SDK_CPP_VER_PATCH}"
+WORKDIR /tmp/tiledb
 
-# # Build the AWS SDK C++.
-# RUN git clone --depth 1 --shallow-submodules --recurse-submodules --branch ${AWS_SDK_CPP_VERSION} \
-#     https://github.com/aws/aws-sdk-cpp.git /tmp/aws-sdk-cpp/ && \
-#     mkdir -p /tmp/aws-sdk-cpp/build && \
-#     cd /tmp/aws-sdk-cpp/build && \
-#     CXX=clang++ CC=clang \
-#     cmake \
-#     -DBUILD_ONLY="s3" \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DCPP_STANDARD=17 \
-#     -DENABLE_TESTING=OFF \
-#     -DCUSTOM_MEMORY_MANAGEMENT=OFF \
-#     -DCMAKE_INSTALL_PREFIX=/opt/aws-sdk-cpp-${AWS_SDK_CPP_VER}/ \
-#     .. && \
-#     cmake --build . --config=Release && \
-#     cmake --install . --config=Release && \
-#     rm -rf /tmp/aws-sdk-cpp
-
-
-
-# Install TileDB
-# RUN wget -P /home/tiledb https://github.com/TileDB-Inc/TileDB/archive/${version}.tar.gz \
-#     && tar xzf /home/tiledb/${version}.tar.gz -C /home/tiledb \
-#     && rm /home/tiledb/${version}.tar.gz \
-#     && cd /home/tiledb/TileDB-${version} \
-#     && mkdir build \
-#     && cd build \
-#     && ../bootstrap --prefix=/usr/local --enable-azure --enable-s3 --enable-serialization --enable=${enable} \
-#     && make -j$(nproc) \
-#     && make -j$(nproc) examples \
-#     && make install-tiledb \
-#     && rm -rf /home/tiledb/TileDB-${version}
-
-# RUN git clone https://github.com/Microsoft/vcpkg.git ${TMPDIR}/vcpkg \
-#     && cd ${TMPDIR}/vcpkg \
-#     && ./bootstrap-vcpkg.sh \
-#     && ./vcpkg install aws-sdk-cpp[core,s3] \
-#     && rm -rf ${TMPDIR}/vcpkg
-# WORKDIR /home/vcpkg
-# RUN ./bootstrap-vcpkg.sh
-
-# Build TileDB.
-# RUN git config --global advice.detachedHead false \
-#     && git clone \
-#     --quiet \
-#     --depth 1 \
-#     --shallow-submodules \
-#     --recurse-submodules \
-#     --branch ${TILEDB_VERSION} \
-#     ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
-#     && cd ${TMPDIR}/tiledb \
-#     && mkdir build \
-#     && cd build \
-# && CXX=clang++ CC=clang \
-# && CMAKE_MAKE_PROGRAM=$(which make) \
-# && CMAKE_GENERATOR="Unix Makefiles" \
-# && ../bootstrap \
-# --prefix=/usr/local \
-# --enable-s3 \
-# --enable-serialization \
-# && make ${BUILD_CORES:-$(nproc)} \
-# && make install-tiledb \
-# && rm -rf ${TMPDIR}/tiledb
-
-# Install dependencies
-# RUN apt-get update && apt-get install -y \
-#     libsnappy-dev libblosc-dev liblzma-dev libcurl4-openssl-dev \
-#     libjemalloc-dev libtbb-dev libtbb-dev libtiff-dev \
-#     libz-dev libboost-all-dev ca-certificates clang-format clang-tidy && \
-#     rm -rf /var/lib/apt/lists/*
-
-
-
-
-# https://github.com/TileDB-Inc/TileDB/blob/dev/doc/dev/BUILD.md
-# https://github.com/TileDB-Inc/TileDB/blob/dev/cmake/Options/BuildOptions.cmake
-# https://dev.to/pgradot/just-in-case-debian-bookworm-comes-with-a-buggy-gcc-2e9b
-RUN git config --global advice.detachedHead false \
-    && git clone \
-    --quiet \
-    --depth 1 \
-    --shallow-submodules \
-    --recurse-submodules \
-    --branch ${TILEDB_VERSION} \
-    ${TILEDB_REPO_URL} ${TMPDIR}/tiledb/ \
-    && cd ${TMPDIR}/tiledb \
+# Clone the TileDB repository and configure the build.
+RUN git clone --quiet --depth 1 --shallow-submodules --recurse-submodules --branch ${TILEDB_VERSION} ${TILEDB_REPO_URL} . \
     && mkdir build \
     && cd build \
     && cmake .. \
     -GNinja \
     -DCOMPILER_SUPPORTS_AVX2=FALSE \
-    # -DTILEDB_VCPKG_BASE_TRIPLET="x64-linux" \
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_INSTALL_PREFIX="/usr/local" \
     -DTILEDB_REMOVE_DEPRECATIONS="OFF" \
@@ -172,11 +111,54 @@ RUN git config --global advice.detachedHead false \
     -DTILEDB_WEBP="ON" \
     -DTILEDB_EXPERIMENTAL_FEATURES="OFF" \
     -DTILEDB_TESTS_AWS_S3_CONFIG="OFF" \
-    -DTILEDB_DISABLE_AUTO_VCPKG="OFF"
-# && ninja --verbose -j1 all
+    -DTILEDB_DISABLE_AUTO_VCPKG="OFF" \
+    && ninja --verbose -j1 all \
+    && ninja --verbose -j1 install-tiledb
 
-WORKDIR ${TMPDIR}/tiledb/build
-# make --jobs=$(nproc) && \
-# make install
+######################################################################
+# Stage 3: Build TileDB-Py
+# This stage clones the TileDB-Py repository and installs the Python bindings.
+######################################################################
+FROM base AS build-tiledb-py
 
+LABEL stage="build-tiledb-py"
+LABEL description="Stage to build and install TileDB-Py."
+
+ARG TILEDB_PY_VER_MAJOR=0
+ARG TILEDB_PY_VER_MINOR=31
+ARG TILEDB_PY_VER_PATCH=1
+ARG TILEDB_PY_REPO_URL="https://github.com/TileDB-Inc/TileDB-Py.git"
+
+ENV TILEDB_PY_VERSION="${TILEDB_PY_VER_MAJOR}.${TILEDB_PY_VER_MINOR}.${TILEDB_PY_VER_PATCH}"
+
+WORKDIR /tmp/tiledb-py
+
+# Clone the TileDB-Py repository and install the Python bindings.
+RUN git clone --quiet --recurse-submodules --branch ${TILEDB_PY_VERSION} ${TILEDB_PY_REPO_URL} . \
+    && cd TileDB-Py \
+    && pip3 install -r requirements.txt \
+    && python3 setup.py install --tiledb=/usr/local
+
+######################################################################
+# Stage 4: Final Image
+# This stage copies the necessary files from the build stages and prepares the final image.
+######################################################################
+FROM base AS final
+
+LABEL stage="final"
+LABEL description="Final stage with TileDB and TileDB-Py installed."
+
+# Copy TileDB and TileDB-Py installations from the build stages.
+COPY --from=build-tiledb /usr/local /usr/local
+COPY --from=build-tiledb-py /usr/local /usr/local
+
+# Set the environment variable to ensure the correct libraries are found.
 ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
+
+# Set working directory.
+WORKDIR /workspace
+
+# RUN ${SANCTUARY_BIN}/post-install.sh
+
+# Default command (override as needed).
+CMD ["/bin/bash"]
