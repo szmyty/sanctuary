@@ -41,6 +41,8 @@ FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION} AS base
 
 LABEL stage="base"
 LABEL description="Base stage with necessary dependencies for building TileDB."
+# Switch to root user to install required dependencies.
+USER root
 
 # Install required dependencies for the build.
 RUN apt-get update && apt-get install --yes \
@@ -122,7 +124,7 @@ RUN git clone --quiet --depth 1 --shallow-submodules --recurse-submodules --bran
 FROM base AS build-tiledb-py
 
 LABEL stage="build-tiledb-py"
-LABEL description="Stage to build and install TileDB-Py."
+LABEL description="Stage to build and install TileDB-Py with a virtual environment."
 
 ARG TILEDB_PY_VER_MAJOR=0
 ARG TILEDB_PY_VER_MINOR=31
@@ -130,14 +132,21 @@ ARG TILEDB_PY_VER_PATCH=1
 ARG TILEDB_PY_REPO_URL="https://github.com/TileDB-Inc/TileDB-Py.git"
 
 ENV TILEDB_PY_VERSION="${TILEDB_PY_VER_MAJOR}.${TILEDB_PY_VER_MINOR}.${TILEDB_PY_VER_PATCH}"
+ENV VIRTUAL_ENV="/opt/venv"
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /tmp/tiledb-py
 
-# Clone the TileDB-Py repository and install the Python bindings.
-RUN git clone --quiet --recurse-submodules --branch ${TILEDB_PY_VERSION} ${TILEDB_PY_REPO_URL} . \
-    && cd TileDB-Py \
-    && pip3 install -r requirements.txt \
-    && python3 setup.py install --tiledb=/usr/local
+# Install Python3 venv package, clone the TileDB-Py repository, and install the Python bindings in a virtual environment.
+RUN apt-get update && apt-get install -y python3-venv \
+    && python3 -m venv $VIRTUAL_ENV \
+    && git clone --quiet --recurse-submodules --branch ${TILEDB_PY_VERSION} ${TILEDB_PY_REPO_URL} . \
+    && pip install --upgrade pip \
+    && pip install --requirement requirements.txt \
+    && python setup.py install --tiledb=/usr/local
+
+# Clean up APT when done.
+RUN apt-get remove -y python3-venv && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ######################################################################
 # Stage 4: Final Image
@@ -159,6 +168,8 @@ ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
 WORKDIR /workspace
 
 # RUN ${SANCTUARY_BIN}/post-install.sh
+
+# Need to switch to a non-root user to avoid running as root.
 
 # Default command (override as needed).
 CMD ["/bin/bash"]

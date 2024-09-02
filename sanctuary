@@ -53,6 +53,7 @@ cmd=(
   "--env-file" "containers/base/base.env"
   "--env-file" "containers/redis/redis.env"
   "--env-file" "containers/tiledb/tiledb.env"
+  "--env-file" "containers/minio/minio.env"
   "--parallel" "1"
   "--ansi" "always"
   "up"

@@ -137,8 +137,13 @@ RUN apt-get update \
     libtool=2.4.7-7~deb12u1 \
     ccache=4.8+really4.7.5-1 \
     python3=3.11.2-1+b1 \
-    python3-dev=3.11.2-1+b1 \
-    && rm -rf /var/lib/apt/lists/*
+    python3-dev=3.11.2-1+b1
+
+# Copy the git configuration file to the container.
+COPY config/.gitconfig /root/.gitconfig
+
+# Log the current git configuration.
+RUN git config --list --show-origin > /var/log/gitconfig.log
 
 # Stage 2: Building the Base Image
 FROM dependencies as base

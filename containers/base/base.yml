@@ -10,9 +10,9 @@ services:
     extends:
       file: ../common.yml
       service: common
+    image: ${COMPOSE_PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}
     hostname: ${COMPOSE_PROJECT_NAME}.${BASE_HOSTNAME}
     container_name: ${COMPOSE_PROJECT_NAME}-${BASE_HOSTNAME}
-    image: ${COMPOSE_PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION}
     # platform: linux/amd64
     annotations:
       com.docker.compose.service: ${COMPOSE_PROJECT_NAME}-${BASE_HOSTNAME}

@@ -139,6 +139,7 @@
         "cSpell.words": [
             "commitizen",
             "commitlint",
+            "minio",
             "Mulan",
             "shellcheck",
             "syncpack",
