@@ -29,6 +29,9 @@ ARG SANCTUARY_GID=65532
 ARG SANCTUARY_HOME=/home/${SANCTUARY_USER}
 ARG SANCTUARY_BIN=${SANCTUARY_HOME}/bin
 ARG SANCTUARY_CONFIG=${SANCTUARY_HOME}/config
+ARG SANCTUARY_TOOLS_BIN=${SANCTUARY_BIN}/tools
+ARG SANCTUARY_HARDENING_BIN=${SANCTUARY_BIN}/hardening
+
 ARG LANG=en_US.UTF-8
 ARG LANGUAGE=en_US:en
 ARG TZ=UTC
@@ -102,8 +105,8 @@ RUN apt-get update \
     locales=2.36-9+deb12u7 \
     locales-all=2.36-9+deb12u7 \
     && rm -rf /var/lib/apt/lists/* \
-    && "${SANCTUARY_BIN}/tools/configure_locale.sh" \
-    && "${SANCTUARY_BIN}/tools/set_timezone.sh"
+    && "${SANCTUARY_TOOLS_BIN}/setup_locale.sh" \
+    && "${SANCTUARY_TOOLS_BIN}/set_timezone.sh"
 
 # TODO set versions per platform
 RUN apt-get update \
@@ -140,7 +143,12 @@ RUN apt-get update \
     python3-dev=3.11.2-1+b1
 
 # Copy the git configuration file to the container.
-COPY config/.gitconfig /root/.gitconfig
+COPY --chown=root:root config/.gitconfig /root/.gitconfig
+
+# Copy the same file to the sanctuary user's home directory. TODO use variables
+COPY --chown=sanctuary:sanctuary config/.gitconfig /home/sanctuary/.gitconfig
+
+RUN printenv | sort > /var/log/environment.log
 
 # Log the current git configuration.
 RUN git config --list --show-origin > /var/log/gitconfig.log

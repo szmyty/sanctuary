@@ -133,33 +133,34 @@ ARG TILEDB_PY_REPO_URL="https://github.com/TileDB-Inc/TileDB-Py.git"
 
 ENV TILEDB_PY_VERSION="${TILEDB_PY_VER_MAJOR}.${TILEDB_PY_VER_MINOR}.${TILEDB_PY_VER_PATCH}"
 ENV VIRTUAL_ENV="/opt/venv"
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
 WORKDIR /tmp/tiledb-py
 
 # Install Python3 venv package, clone the TileDB-Py repository, and install the Python bindings in a virtual environment.
-RUN apt-get update && apt-get install -y python3-venv \
-    && python3 -m venv $VIRTUAL_ENV \
-    && git clone --quiet --recurse-submodules --branch ${TILEDB_PY_VERSION} ${TILEDB_PY_REPO_URL} . \
-    && pip install --upgrade pip \
-    && pip install --requirement requirements.txt \
-    && python setup.py install --tiledb=/usr/local
+RUN apt-get update && apt-get install --yes python3-venv \
+    && python3 -m venv ${VIRTUAL_ENV} \
+    && git clone --quiet --recurse-submodules --branch ${TILEDB_PY_VERSION} ${TILEDB_PY_REPO_URL} .
+#     && pip install --upgrade pip \
+#     && pip install --requirement requirements.txt \
+#     && python setup.py install --tiledb=/usr/local
 
-# Clean up APT when done.
-RUN apt-get remove -y python3-venv && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+# # Clean up APT when done.
+# RUN apt-get remove -y python3-venv && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ######################################################################
 # Stage 4: Final Image
 # This stage copies the necessary files from the build stages and prepares the final image.
 ######################################################################
-FROM base AS final
+# FROM base AS final
+FROM  build-tiledb-py as final
 
 LABEL stage="final"
 LABEL description="Final stage with TileDB and TileDB-Py installed."
 
 # Copy TileDB and TileDB-Py installations from the build stages.
-COPY --from=build-tiledb /usr/local /usr/local
-COPY --from=build-tiledb-py /usr/local /usr/local
+# COPY --from=build-tiledb /usr/local /usr/local
+# COPY --from=build-tiledb-py /usr/local /usr/local
 
 # Set the environment variable to ensure the correct libraries are found.
 ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
