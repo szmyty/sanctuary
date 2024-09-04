@@ -25,7 +25,7 @@
 # This stage sets up the base environment with necessary packages and dependencies.
 ######################################################################
 # Project name.
-ARG PROJECT_NAME=sanctuary
+ARG PROJECT_NAME=${COMPOSE_PROJECT_NAME}
 
 # Image name to use.
 ARG BASE_IMAGE_NAME=base
@@ -34,15 +34,21 @@ ARG BASE_IMAGE_NAME=base
 ARG BASE_IMAGE_VERSION=latest
 
 ARG TILEDB_PORT=6379
-ARG TILEDB_DATA_DIR=
+
+# Installation prefix for TileDB to be installed at.
+ARG TILEDB_DATA_HOME=${SANCTUARY_DATA}/tiledb
 
 # Use a base image.
 FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION} AS base
 
 LABEL stage="base"
 LABEL description="Base stage with necessary dependencies for building TileDB."
+
 # Switch to root user to install required dependencies.
 USER root
+
+ENV PATH="${TILEDB_DATA_HOME}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${TILEDB_DATA_HOME}/lib:${LD_LIBRARY_PATH}"
 
 # Install required dependencies for the build.
 RUN apt-get update && apt-get install --yes \
@@ -79,19 +85,55 @@ ARG TILEDB_VER_MINOR=25
 ARG TILEDB_VER_PATCH=0
 ARG TILEDB_REPO_URL="https://github.com/TileDB-Inc/TileDB.git"
 
+ARG COMPILER_SUPPORTS_AVX2=FALSE
+ARG CMAKE_BUILD_TYPE="Release"
+ARG -DCMAKE_INSTALL_PREFIX=${TILEDB_DATA_HOME}
+ARG -DTILEDB_REMOVE_DEPRECATIONS="OFF"
+ARG -DTILEDB_VERBOSE="ON"
+ARG -DTILEDB_S3="ON"
+ARG -DTILEDB_AZURE="OFF"
+ARG -DTILEDB_GCS="OFF"
+ARG -DTILEDB_HDFS="OFF"
+ARG -DTILEDB_WERROR="OFF"
+ARG -DCMAKE_C_COMPILER=$(which gcc)
+ARG -DCMAKE_CXX_COMPILER=$(which g++)
+ARG -DTILEDB_ASSERTIONS="OFF"
+ARG -DTILEDB_CPP_API="ON"
+ARG -DTILEDB_STATS="ON"
+ARG -DBUILD_SHARED_LIBS="ON"
+ARG -DTILEDB_TESTS="ON"
+ARG -DTILEDB_TOOLS="ON"
+ARG -DTILEDB_SERIALIZATION="ON"
+ARG -DTILEDB_CCACHE="ON"
+ARG -DTILEDB_ARROW_TESTS="OFF"
+ARG -DTILEDB_WEBP="ON"
+ARG -DTILEDB_EXPERIMENTAL_FEATURES="OFF"
+ARG -DTILEDB_TESTS_AWS_S3_CONFIG="OFF"
+ARG -DTILEDB_DISABLE_AUTO_VCPKG="OFF"
+
 ENV TILEDB_VERSION="${TILEDB_VER_MAJOR}.${TILEDB_VER_MINOR}.${TILEDB_VER_PATCH}"
 
 WORKDIR /tmp/tiledb
 
+# Setting the compilers
+ENV CXX=g++
+ENV CC=gcc
+
 # Clone the TileDB repository and configure the build.
-RUN git clone --quiet --depth 1 --shallow-submodules --recurse-submodules --branch ${TILEDB_VERSION} ${TILEDB_REPO_URL} . \
+RUN git clone \
+    --quiet \
+    --depth 1 \
+    --shallow-submodules \
+    --recurse-submodules \
+    --branch ${TILEDB_VERSION} \
+    ${TILEDB_REPO_URL} . \
     && mkdir build \
     && cd build \
     && cmake .. \
     -GNinja \
     -DCOMPILER_SUPPORTS_AVX2=FALSE \
     -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_INSTALL_PREFIX="/usr/local" \
+    -DCMAKE_INSTALL_PREFIX=${TILEDB_DATA_HOME} \
     -DTILEDB_REMOVE_DEPRECATIONS="OFF" \
     -DTILEDB_VERBOSE="ON" \
     -DTILEDB_S3="ON" \
@@ -99,8 +141,8 @@ RUN git clone --quiet --depth 1 --shallow-submodules --recurse-submodules --bran
     -DTILEDB_GCS="OFF" \
     -DTILEDB_HDFS="OFF" \
     -DTILEDB_WERROR="OFF" \
-    -DCMAKE_C_COMPILER="/usr/bin/gcc" \
-    -DCMAKE_CXX_COMPILER="/usr/bin/g++" \
+    -DCMAKE_C_COMPILER=$(which gcc) \
+    -DCMAKE_CXX_COMPILER=$(which g++) \
     -DTILEDB_ASSERTIONS="OFF" \
     -DTILEDB_CPP_API="ON" \
     -DTILEDB_STATS="ON" \

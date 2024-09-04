@@ -26,7 +26,7 @@ services:
         - BASE_IMAGE_NAME=${BASE_IMAGE_NAME}
         - BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION}
         - TILEDB_PORT=${TILEDB_PORT}
-        - TILEDB_DATA_DIR=${TILEDB_DATA_DIR}
+        - TILEDB_DATA_HOME=${TILEDB_DATA_HOME}
       # platforms:
       # - "linux/arm64"
       # - "linux/amd64"
@@ -39,7 +39,7 @@ services:
       - TILEDB_S3_ACCESS_KEY_ID=${TILEDB_S3_ACCESS_KEY_ID}
       - TILEDB_S3_SECRET_ACCESS_KEY=${TILEDB_S3_SECRET_ACCESS_KEY}
     volumes:
-      - ${TILEDB_DATA_VOLUME}:${TILEDB_DATA_DIR}
+      - ${TILEDB_DATA_VOLUME}:${TILEDB_DATA_HOME}
     networks:
       default:
         aliases:

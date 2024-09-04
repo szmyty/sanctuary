@@ -40,7 +40,13 @@ ensure_buildx_builder() {
 
 # echo "Builder: $(docker buildx inspect)"
 
-# docker compose --file sanctuary.yml --env-file sanctuary.env --env-file containers/base/base.env --parallel 1 --ansi always build base
+# docker compose \
+# --file sanctuary.yml \
+# --env-file sanctuary.env \
+# --env-file containers/base/base.env \
+# --parallel 1 \
+# --ansi always \
+# build base
 
 # Array of services to bring up. Add more services here as needed.
 services=("tiledb")

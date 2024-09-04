@@ -32,7 +32,7 @@ is_package_installed() {
     _package_status=$(dpkg-query --show --showformat='${Status}\n' "${_package}" 2>/dev/null)
 
     # Check if the package is installed
-    if echo "${_package_status}" | grep -q "install ok installed"; then
+    if echo "${_package_status}" | grep --quiet "install ok installed"; then
         echo "Package '${_package}' is already installed."
         return 0
     else

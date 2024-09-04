@@ -11,6 +11,11 @@
 # @Author       : Alan Szmyt
 # @Date         : 2024-08-23
 # @Version      : 1.0
+#
+# @References   :
+#   - https://docs.docker.com/reference/dockerfile/
+#   - https://docs.docker.com/build/building/best-practices/
+#   - https://docs.docker.com/develop/develop-images/multistage-build/
 ######################################################################
 
 # Stage 1: Base Image Setup
@@ -31,7 +36,9 @@ ARG SANCTUARY_BIN=${SANCTUARY_HOME}/bin
 ARG SANCTUARY_CONFIG=${SANCTUARY_HOME}/config
 ARG SANCTUARY_TOOLS_BIN=${SANCTUARY_BIN}/tools
 ARG SANCTUARY_HARDENING_BIN=${SANCTUARY_BIN}/hardening
-
+ARG SANCTUARY_LOGS=${SANCTUARY_HOME}/logs
+ARG SANCTUARY_DATA=${SANCTUARY_HOME}/data
+ARG TMPDIR=/tmp
 ARG LANG=en_US.UTF-8
 ARG LANGUAGE=en_US:en
 ARG TZ=UTC
@@ -45,6 +52,10 @@ ENV BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} \
     SANCTUARY_HOME=${SANCTUARY_HOME} \
     SANCTUARY_BIN=${SANCTUARY_BIN} \
     SANCTUARY_CONFIG=${SANCTUARY_CONFIG} \
+    SANCTUARY_TOOLS_BIN=${SANCTUARY_TOOLS_BIN} \
+    SANCTUARY_HARDENING_BIN=${SANCTUARY_HARDENING_BIN} \
+    SANCTUARY_LOGS=${SANCTUARY_LOGS} \
+    SANCTUARY_DATA=${SANCTUARY_DATA} \
     DEBIAN_FRONTEND=noninteractive \
     DEBCONF_NONINTERACTIVE_SEEN=true \
     DEBIAN_PRIORITY=critical \
@@ -52,7 +63,7 @@ ENV BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} \
     TERM=xterm-256color \
     APT_LISTCHANGES_FRONTEND=none \
     APT_LISTBUGS_FRONTEND=none \
-    TMPDIR=/tmp \
+    TMPDIR=${TMPDIR} \
     LANG=${LANG} \
     LANGUAGE=${LANGUAGE} \
     TZ=${TZ}
@@ -81,17 +92,17 @@ RUN groupadd \
 WORKDIR ${SANCTUARY_HOME}
 
 # Copy the scripts from the local bin directory to the container's bin directory.
-COPY --chown=${SANCTUARY_USER}:${SANCTUARY_GROUP} bin ${SANCTUARY_BIN}
+COPY --chown=${SANCTUARY_USER}:${SANCTUARY_GROUP} --chmod=500 bin ${SANCTUARY_BIN}
 
 # Make sure the scripts are executable.
-RUN chmod --recursive +x ${SANCTUARY_BIN}/*
+# RUN chmod --recursive +x ${SANCTUARY_BIN}/*
 
 # Copy apt.conf and dpkg.cfg to their respective locations.
 COPY config/apt.conf /etc/apt/apt.conf.d/99docker-apt.conf
 COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99docker-dpkg.cfg
 
 # Copy the package list to the container.
-COPY package.list /${TMPDIR}/package.list
+COPY package.list ${TMPDIR}/package.list
 
 # Log the current APT configuration.
 RUN apt-config dump > /var/log/apt-config.log
@@ -105,12 +116,13 @@ RUN apt-get update \
     locales=2.36-9+deb12u7 \
     locales-all=2.36-9+deb12u7 \
     && rm -rf /var/lib/apt/lists/* \
-    && "${SANCTUARY_TOOLS_BIN}/setup_locale.sh" \
-    && "${SANCTUARY_TOOLS_BIN}/set_timezone.sh"
+    && ${SANCTUARY_TOOLS_BIN}/setup_locale.sh \
+    && ${SANCTUARY_TOOLS_BIN}/set_timezone.sh
 
 # TODO set versions per platform
 RUN apt-get update \
     && apt-get install \
+    apt-utils \
     ca-certificates=20230311 \
     curl \
     cmake=3.25.1-1 \
@@ -142,22 +154,24 @@ RUN apt-get update \
     python3=3.11.2-1+b1 \
     python3-dev=3.11.2-1+b1
 
-# Copy the git configuration file to the container.
-COPY --chown=root:root config/.gitconfig /root/.gitconfig
+# Set the environment variable for the global Git config location for all users
+ENV GIT_CONFIG=${SANCTUARY_CONFIG}/.gitconfig
 
-# Copy the same file to the sanctuary user's home directory. TODO use variables
-COPY --chown=sanctuary:sanctuary config/.gitconfig /home/sanctuary/.gitconfig
+# Copy the Git config file to a common location accessible by all users
+COPY --chown=root:root --chmod=644 config/.gitconfig ${GIT_CONFIG}
 
 RUN printenv | sort > /var/log/environment.log
 
 # Log the current git configuration.
 RUN git config --list --show-origin > /var/log/gitconfig.log
 
+RUN dpkg --get-selections > /tmp/installed_packages.txt
+
 # Stage 2: Building the Base Image
 FROM dependencies as base
 
 # Switch to the non-root user.
-USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
+# USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
 
 # Set Bash as the entry point to keep the container running.
 ENTRYPOINT [ "bash", "-c", "tail -f /dev/null" ]
