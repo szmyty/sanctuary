@@ -16,6 +16,7 @@ x-labels: &labels
     app.name: ${COMPOSE_PROJECT_NAME} # Name of the application, set using the Compose project name
 
 # Include external Docker Compose files for specific services
+# https://docs.docker.com/compose/multiple-compose-files/include/
 include:
   # Path to the Base service Docker Compose file
   - path: ${CONTAINERS_ROOT}/base/base.yml

@@ -1,5 +1,6 @@
-# syntax=docker/dockerfile:1
-
+# syntax=docker/dockerfile:1.3
+# check=error=true
+# escape=\
 ######################################################################
 # @Project      : sanctuary
 # @File         : Dockerfile
@@ -19,14 +20,50 @@
 ######################################################################
 
 # Stage 1: Base Image Setup
-ARG DEBIAN_IMAGE_VERSION=bookworm-20240812
+ARG DEBIAN_IMAGE_VERSION=@sha256:21887a619d762d236e7c66666ca657622ed8749e788322400b86ab09283d8fba
 ARG PLATFORM=linux/amd64
 
 FROM debian:${DEBIAN_IMAGE_VERSION} AS dependencies
 
 # FROM --platform=${BUILDPLATFORM} debian:${DEBIAN_IMAGE_VERSION} AS dependencies
 
+# Define ARG variables
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+
+# Set labels using OCI conventions and incorporating ARG variables
+# https://github.com/opencontainers/image-spec/blob/v1.0.1/annotations.md
+# https://specs.opencontainers.org/image-spec/annotations/
+LABEL \
+    org.opencontainers.image.created="2024-08-23" \
+    org.opencontainers.image.authors="Alan Szmyt" \
+    org.opencontainers.image.url="https://example.com/myimage" \
+    org.opencontainers.image.documentation="https://example.com/myimage/docs" \
+    org.opencontainers.image.source="https://github.com/example/myimage" \
+    org.opencontainers.image.version="1.0" \
+    org.opencontainers.image.revision="abc1234" \
+    org.opencontainers.image.vendor="Example, Inc." \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.title="My Custom Image" \
+    org.opencontainers.image.description="This image is used for..." \
+    org.opencontainers.image.base.name="debian:bookworm" \
+    org.opencontainers.image.target.platform="${TARGETPLATFORM}" \
+    org.opencontainers.image.target.os="${TARGETOS}" \
+    org.opencontainers.image.target.arch="${TARGETARCH}" \
+    org.opencontainers.image.target.variant="${TARGETVARIANT}" \
+    org.opencontainers.image.build.platform="${BUILDPLATFORM}" \
+    org.opencontainers.image.build.os="${BUILDOS}" \
+    org.opencontainers.image.build.arch="${BUILDARCH}" \
+    org.opencontainers.image.build.variant="${BUILDVARIANT}"
+
 # Arguments with default values.
+# @see: https://docs.docker.com/reference/dockerfile/#arg
 ARG SANCTUARY_USER=sanctuary
 ARG SANCTUARY_GROUP=sanctuary
 ARG SANCTUARY_UID=65532
@@ -94,9 +131,6 @@ WORKDIR ${SANCTUARY_HOME}
 # Copy the scripts from the local bin directory to the container's bin directory.
 COPY --chown=${SANCTUARY_USER}:${SANCTUARY_GROUP} --chmod=500 bin ${SANCTUARY_BIN}
 
-# Make sure the scripts are executable.
-# RUN chmod --recursive +x ${SANCTUARY_BIN}/*
-
 # Copy apt.conf and dpkg.cfg to their respective locations.
 COPY config/apt.conf /etc/apt/apt.conf.d/99docker-apt.conf
 COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99docker-dpkg.cfg
@@ -120,39 +154,55 @@ RUN apt-get update \
     && ${SANCTUARY_TOOLS_BIN}/set_timezone.sh
 
 # TODO set versions per platform
+# https://docs.docker.com/build/building/best-practices/#apt-get
 RUN apt-get update \
-    && apt-get install \
+    && apt-get install --yes \
     apt-utils \
-    ca-certificates=20230311 \
+    build-essential \
+    bzip2 \
+    ca-certificates \
+    ccache \
+    clang-format \
+    clang-tidy \
+    cmake \
     curl \
-    cmake=3.25.1-1 \
-    build-essential=12.9 \
-    git=1:2.39.2-1.1 \
-    libssl-dev \
-    libbz2-dev=1.0.8-5+b1 \
-    liblz4-dev=1.9.4-1 \
-    libzstd-dev=1.5.4+dfsg2-5 \
-    zlib1g-dev=1:1.2.13.dfsg-1 \
-    libcurl4-openssl-dev \
-    liblz4-dev=1.9.4-1 \
-    libbz2-dev=1.0.8-5+b1 \
-    libboost-all-dev=1.74.0.3 \
-    libblosc-dev=1.21.3+ds-1 \
-    zip=3.0-13 \
-    unzip=6.0-28 \
-    pkg-config=1.8.1-1 \
-    ninja-build=1.11.1-1 \
-    clang-format=1:14.0-55.7~deb12u1 \
-    clang-tidy=1:14.0-55.7~deb12u1 \
-    doxygen=1.9.4-4 \
+    dnsutils \
+    doxygen \
+    git \
     graphviz \
-    libpng-dev=1.6.39-2 \
-    libpng-tools=1.6.39-2 \
-    libtiff-dev=4.5.0-6+deb12u1 \
-    libtool=2.4.7-7~deb12u1 \
-    ccache=4.8+really4.7.5-1 \
-    python3=3.11.2-1+b1 \
-    python3-dev=3.11.2-1+b1
+    htop \
+    iputils-ping \
+    libboost-all-dev \
+    libblosc-dev \
+    libbz2-dev \
+    libcurl4-openssl-dev \
+    liblz4-dev \
+    libpng-dev \
+    libpng-tools \
+    libspdlog-dev \
+    libssl-dev \
+    libtiff-dev \
+    libtool \
+    libzstd-dev \
+    locales \
+    locales-all \
+    lsof \
+    nano \
+    net-tools \
+    ninja-build \
+    pkg-config \
+    python3 \
+    python3-dev \
+    strace \
+    sysstat \
+    tcpdump \
+    unzip \
+    vim \
+    wget \
+    xz-utils \
+    zip \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the environment variable for the global Git config location for all users
 ENV GIT_CONFIG=${SANCTUARY_CONFIG}/.gitconfig
@@ -171,7 +221,7 @@ RUN dpkg --get-selections > /tmp/installed_packages.txt
 FROM dependencies as base
 
 # Switch to the non-root user.
-# USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
+USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
 
 # Set Bash as the entry point to keep the container running.
 ENTRYPOINT [ "bash", "-c", "tail -f /dev/null" ]

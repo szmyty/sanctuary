@@ -1,5 +1,6 @@
-# syntax=docker/dockerfile:1
-
+# syntax=docker/dockerfile:1.3
+# check=error=true
+# escape=\
 ######################################################################
 # @Project      : sanctuary
 # @File         : Dockerfile
@@ -18,6 +19,9 @@
 #   - https://github.com/TileDB-Inc/TileDB/releases/tag/2.25.0
 #   - https://github.com/microsoft/vcpkg/blob/master/scripts/bootstrap.sh
 #   - https://github.com/GeorgeErickson/TileDB/blob/dev/doc/source/installation.rst
+#   - https://github.com/TileDB-Inc/TileDB/blob/dev/examples/Dockerfile/Dockerfile
+#   - https://github.com/microsoft/vcpkg
+#   - https://medium.com/axops-academy/setting-up-aws-c-sdk-and-lambda-library-on-amazon-linux-2-3ab6cf6af23a
 ######################################################################
 
 ######################################################################
@@ -74,6 +78,7 @@ RUN apt-get update && apt-get install --yes \
 ######################################################################
 # Stage 2: Build TileDB
 # This stage clones the TileDB repository and builds it.
+# https://docs.tiledb.com/main/how-to/installation/building-from-source
 ######################################################################
 FROM base AS build-tiledb
 
@@ -110,6 +115,7 @@ ARG -DTILEDB_WEBP="ON"
 ARG -DTILEDB_EXPERIMENTAL_FEATURES="OFF"
 ARG -DTILEDB_TESTS_AWS_S3_CONFIG="OFF"
 ARG -DTILEDB_DISABLE_AUTO_VCPKG="OFF"
+ARG TILEDB_BUILD_PROC=2
 
 ENV TILEDB_VERSION="${TILEDB_VER_MAJOR}.${TILEDB_VER_MINOR}.${TILEDB_VER_PATCH}"
 
@@ -156,8 +162,11 @@ RUN git clone \
     -DTILEDB_EXPERIMENTAL_FEATURES="OFF" \
     -DTILEDB_TESTS_AWS_S3_CONFIG="OFF" \
     -DTILEDB_DISABLE_AUTO_VCPKG="OFF" \
-    && ninja --verbose -j1 all \
-    && ninja --verbose -j1 install-tiledb
+    && ninja --verbose -j${TILEDB_BUILD_PROC} all \
+    && ninja --verbose -j${TILEDB_BUILD_PROC} install-tiledb \
+    && ninja --verbose -j${TILEDB_BUILD_PROC} check \
+    && ninja --verbose -j${TILEDB_BUILD_PROC} examples \
+    && ldconfig
 
 ######################################################################
 # Stage 3: Build TileDB-Py
@@ -167,6 +176,13 @@ FROM base AS build-tiledb-py
 
 LABEL stage="build-tiledb-py"
 LABEL description="Stage to build and install TileDB-Py with a virtual environment."
+
+# TODO: https://docs.tiledb.com/main/how-to/installation/building-from-source/python
+# https://docs.tiledb.com/main/how-to/installation/usage/python
+
+# TODO need to configure TileDB: https://docs.tiledb.com/main/how-to/configuration#basic-usage
+
+# https://packages.debian.org/bookworm/libtbb-dev
 
 ARG TILEDB_PY_VER_MAJOR=0
 ARG TILEDB_PY_VER_MINOR=31

@@ -17,9 +17,7 @@ x-labels: &labels
     app.name: ${COMPOSE_PROJECT_NAME} # Name of the application, set using the Compose project name
 
 # Shared settings for all containers
-x-settings:
-  # Allow containers to access the host machine using the host.docker.internal alias
-  &settings
+x-settings: &settings
   extra_hosts:
     - "host.docker.internal:host-gateway"
   # Restart the container unless it was explicitly stopped by the user
@@ -38,7 +36,33 @@ x-settings:
         - ${COMPOSE_PROJECT_NAME}-network
   init: true
   pull_policy: missing
-  # Apply the common labels to the container
+  attach: true
+  cap_drop: TODO
+    - ALL
+  privileged: false
+  dns_opt:
+    - use-vc
+    - no-tld-query
+    - single-request
+    - rotate
+    - timeout:2
+  <<: *labels
+
+x-build: &build_defaults
+  context: .
+  dockerfile: Dockerfile
+
+  # https://docs.docker.com/reference/compose-file/build/#pull
+  pull: false
+
+  # https://docs.docker.com/reference/compose-file/build/#no_cache
+  no_cache: true
+
+  # https://docs.docker.com/reference/compose-file/build/#privileged
+  privileged: false
+
+  # https://docs.docker.com/reference/compose-file/build/#ssh
+  # ssh: ["default"]
   <<: *labels
 
 # Define a common service that other services can inherit from.
@@ -46,3 +70,5 @@ services:
   common:
     # Inherit all common settings defined above
     <<: *settings
+    build:
+      <<: *build_defaults
