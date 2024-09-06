@@ -23,7 +23,7 @@
 ARG DEBIAN_IMAGE_VERSION=@sha256:21887a619d762d236e7c66666ca657622ed8749e788322400b86ab09283d8fba
 ARG PLATFORM=linux/amd64
 
-FROM debian:${DEBIAN_IMAGE_VERSION} AS dependencies
+FROM debian:${DEBIAN_IMAGE_VERSION} AS setup
 
 # FROM --platform=${BUILDPLATFORM} debian:${DEBIAN_IMAGE_VERSION} AS dependencies
 
@@ -111,6 +111,14 @@ USER root
 # Set safer shell options for script execution.
 SHELL ["/bin/bash", "-o", "errexit", "-o", "errtrace", "-o", "functrace", "-o", "nounset", "-o", "pipefail", "-c"]
 
+RUN mkdir -p ${SANCTUARY_HOME} \
+    && mkdir -p ${SANCTUARY_BIN} \
+    && mkdir -p ${SANCTUARY_CONFIG} \
+    && mkdir -p ${SANCTUARY_TOOLS_BIN} \
+    && mkdir -p ${SANCTUARY_HARDENING_BIN} \
+    && mkdir -p ${SANCTUARY_LOGS} \
+    && mkdir -p ${SANCTUARY_DATA}
+
 # Create a non-root user with specific configurations.
 RUN groupadd \
     --gid ${SANCTUARY_GID} ${SANCTUARY_GROUP} \
@@ -122,40 +130,39 @@ RUN groupadd \
     --comment "Non-root User for Running Applications" \
     --home ${SANCTUARY_HOME} \
     --skel /etc/skel \
-    --shell /bin/bash \
+    --shell /usr/sbin/nologin \
     ${SANCTUARY_USER}
 
 # Set the working directory to the sanctuary home directory.
 WORKDIR ${SANCTUARY_HOME}
 
+# TODO for security, we could have a specific user that is allowed to use the scripts and so you are forced to switch to that user to run the scripts. This will enforce extending the base image to utilize the scripts.
 # Copy the scripts from the local bin directory to the container's bin directory.
 COPY --chown=${SANCTUARY_USER}:${SANCTUARY_GROUP} --chmod=500 bin ${SANCTUARY_BIN}
 
 # Copy apt.conf and dpkg.cfg to their respective locations.
-COPY config/apt.conf /etc/apt/apt.conf.d/99docker-apt.conf
-COPY config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99docker-dpkg.cfg
+COPY --chown=root:root --chmod=644  config/apt.conf /etc/apt/apt.conf.d/99docker-apt.conf
+COPY --chown=root:root --chmod=644  config/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99docker-dpkg.cfg
 
-# Copy the package list to the container.
-COPY package.list ${TMPDIR}/package.list
+# Set the environment variable for the global Git config location for all users
+ENV GIT_CONFIG=${SANCTUARY_CONFIG}/.gitconfig
 
-# Log the current APT configuration.
-RUN apt-config dump > /var/log/apt-config.log
+# Copy the Git config file to a common location accessible by all users
+COPY --chown=root:root --chmod=644 config/.gitconfig ${GIT_CONFIG}
 
-# Optional: Display the log file (for CI/CD or debugging purposes).
-RUN cat /var/log/apt-config.log
+# Disable the automatic removal of downloaded packages
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
-# Configure the locale and timezone.
-RUN apt-get update \
-    && apt-get install \
-    locales=2.36-9+deb12u7 \
-    locales-all=2.36-9+deb12u7 \
-    && rm -rf /var/lib/apt/lists/* \
-    && ${SANCTUARY_TOOLS_BIN}/setup_locale.sh \
-    && ${SANCTUARY_TOOLS_BIN}/set_timezone.sh
+# Stage 2: Installing APT Dependencies.
+FROM setup AS apt-install
 
+# Install packages using cached directories and configure locale and timezone.
 # TODO set versions per platform
 # https://docs.docker.com/build/building/best-practices/#apt-get
-RUN apt-get update \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked,id=apt-lib \
+    apt-get update \
     && apt-get install --yes \
     apt-utils \
     build-essential \
@@ -172,21 +179,25 @@ RUN apt-get update \
     graphviz \
     htop \
     iputils-ping \
+    libaprutil1 \
     libboost-all-dev \
     libblosc-dev \
     libbz2-dev \
     libcurl4-openssl-dev \
+    libksba8 \
     liblz4-dev \
     libpng-dev \
     libpng-tools \
     libspdlog-dev \
     libssl-dev \
+    libtasn1-6 \
     libtiff-dev \
     libtool \
     libzstd-dev \
     locales \
     locales-all \
     lsof \
+    make \
     nano \
     net-tools \
     ninja-build \
@@ -202,26 +213,38 @@ RUN apt-get update \
     xz-utils \
     zip \
     zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && ${SANCTUARY_TOOLS_BIN}/setup_locale.sh \
+    && ${SANCTUARY_TOOLS_BIN}/set_timezone.sh
 
-# Set the environment variable for the global Git config location for all users
-ENV GIT_CONFIG=${SANCTUARY_CONFIG}/.gitconfig
+FROM apt-install AS logger
 
-# Copy the Git config file to a common location accessible by all users
-COPY --chown=root:root --chmod=644 config/.gitconfig ${GIT_CONFIG}
+# Optional: Verify package installation from cache without internet
+RUN --network=none \
+    dpkg -l | grep -E 'locales|cmake|python3' > ${SANCTUARY_LOGS}/packages.log
 
-RUN printenv | sort > /var/log/environment.log
+RUN printenv | sort > ${SANCTUARY_LOGS}/environment.log
 
 # Log the current git configuration.
-RUN git config --list --show-origin > /var/log/gitconfig.log
+RUN git config --list --show-origin > ${SANCTUARY_LOGS}/gitconfig.log
 
-RUN dpkg --get-selections > /tmp/installed_packages.txt
+RUN dpkg --get-selections > ${SANCTUARY_LOGS}/installed_packages.log
 
-# Stage 2: Building the Base Image
-FROM dependencies as base
+# Log the current APT configuration.
+RUN apt-config dump > ${SANCTUARY_LOGS}/apt-config.log
+
+FROM logger as base
 
 # Switch to the non-root user.
 USER ${SANCTUARY_USER}:${SANCTUARY_GROUP}
 
 # Set Bash as the entry point to keep the container running.
 ENTRYPOINT [ "bash", "-c", "tail -f /dev/null" ]
+
+# Healthcheck to ensure the container is running.
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=30s \
+    --start-period=5s \
+    --retries=3 \
+    CMD ${SANCTUARY_BIN}/healthcheck.sh

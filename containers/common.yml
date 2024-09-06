@@ -37,7 +37,7 @@ x-settings: &settings
   init: true
   pull_policy: missing
   attach: true
-  cap_drop: TODO
+  cap_drop:
     - ALL
   privileged: false
   dns_opt:

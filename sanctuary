@@ -12,6 +12,10 @@
 # @Date         : 2024-08-22
 # @Version      : 1.0
 ######################################################################
+set -euox pipefail
+
+# Export the DOCKER_BUILDKIT environment variable
+export DOCKER_BUILDKIT=1 BUILDX_EXPERIMENTAL=1
 
 # Function to check if the Docker buildx builder exists and create it if necessary
 ensure_buildx_builder() {
@@ -34,19 +38,19 @@ ensure_buildx_builder() {
 }
 
 # Call the function
-# ensure_buildx_builder "container-builder"
+ensure_buildx_builder "${BUILDX_BUILDER:-"container-builder"}"
 # docker context use default
 # docker buildx use default
 
-# echo "Builder: $(docker buildx inspect)"
+echo "Builder: $(docker buildx inspect)"
 
-# docker compose \
-# --file sanctuary.yml \
-# --env-file sanctuary.env \
-# --env-file containers/base/base.env \
-# --parallel 1 \
-# --ansi always \
-# build base
+docker compose \
+--file sanctuary.yml \
+--env-file sanctuary.env \
+--env-file containers/base/base.env \
+--parallel 1 \
+--ansi always \
+up --build base
 
 # Array of services to bring up. Add more services here as needed.
 services=("tiledb")
