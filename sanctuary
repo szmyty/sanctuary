@@ -15,7 +15,15 @@
 set -euox pipefail
 
 # Export the DOCKER_BUILDKIT environment variable
-export DOCKER_BUILDKIT=1 BUILDX_EXPERIMENTAL=1
+export \
+    DOCKER_BUILDKIT=1 \
+    BUILDX_EXPERIMENTAL=1 \
+    BUILDKIT_MULTI_PLATFORM=1 \
+    PROJECT_CACHE_DIR="./.cache/buildx" \
+    COMPOSE_DOCKER_CLI_BUILD=1 \
+    DOCKER_DEFAULT_PLATFORM=linux/arm64 \
+    COMPOSE_EXPERIMENTAL=1 \
+    BUILDKIT_CACHE_MOUNT_NS="sanctuary-cache-ns"
 
 # Function to check if the Docker buildx builder exists and create it if necessary
 ensure_buildx_builder() {
@@ -32,6 +40,11 @@ ensure_buildx_builder() {
             --driver docker-container \
             --use --bootstrap
     fi
+
+# docker buildx create --name=container \
+# --driver=docker-container \
+# --buildkitd-flags '--debug' \
+# --use --bootstrap
 
     # Ensure the builder is being used
     docker buildx use "${_builder_name}"
@@ -50,7 +63,7 @@ docker compose \
 --env-file containers/base/base.env \
 --parallel 1 \
 --ansi always \
-up --build base
+build base
 
 # Array of services to bring up. Add more services here as needed.
 services=("tiledb")

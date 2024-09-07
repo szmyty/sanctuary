@@ -37,20 +37,23 @@ x-settings: &settings
   init: true
   pull_policy: missing
   attach: true
-  cap_drop:
-    - ALL
+  # cap_drop:
+  #   - ALL
   privileged: false
-  dns_opt:
-    - use-vc
-    - no-tld-query
-    - single-request
-    - rotate
-    - timeout:2
+  # dns_opt:
+  #   - use-vc
+  #   - no-tld-query
+  #   - single-request
+  #   - rotate
+  #   - timeout:2
+  platform: linux/arm64
   <<: *labels
 
 x-build: &build_defaults
   context: .
   dockerfile: Dockerfile
+  platforms:
+    - "linux/arm64"
 
   # https://docs.docker.com/reference/compose-file/build/#pull
   pull: false

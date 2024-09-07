@@ -47,10 +47,13 @@ services:
       context: .
       dockerfile: base.Dockerfile
       target: base
-
+      # output: type=local,dest=${PROJECT_CACHE_DIR}/.buildx-cache
+      # https://docs.docker.com/reference/cli/docker/buildx/build/#cache-to
+      cache_to:
+        - type=local,dest=${PROJECT_CACHE_DIR}/.buildx-cache
       # Uncomment the following lines to specify platforms for the build
-      # platforms:
-      # - "linux/arm64"
+      platforms:
+        - "linux/arm64"
       # - "linux/amd64"
 
       # Arguments to pass to the build process

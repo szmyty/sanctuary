@@ -16,19 +16,21 @@ services:
     image: ${COMPOSE_PROJECT_NAME}/${TILEDB_IMAGE_NAME}:${TILEDB_IMAGE_TAG}
     hostname: ${COMPOSE_PROJECT_NAME}.${TILEDB_HOSTNAME}
     container_name: ${COMPOSE_PROJECT_NAME}-${TILEDB_HOSTNAME}
-    # platform: linux/amd64
+    platform: "linux/arm64"
     build:
       context: .
       dockerfile: tiledb.Dockerfile
       target: final
+      cache_from:
+        - type=local,src=${PROJECT_CACHE_DIR}/.buildx-cache
       args:
         - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
         - BASE_IMAGE_NAME=${BASE_IMAGE_NAME}
         - BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION}
         - TILEDB_PORT=${TILEDB_PORT}
         - TILEDB_DATA_HOME=${TILEDB_DATA_HOME}
-      # platforms:
-      # - "linux/arm64"
+      platforms:
+        - "linux/arm64"
       # - "linux/amd64"
     ports:
       - "${TILEDB_EXPOSED_PORT}:${TILEDB_PORT}"
