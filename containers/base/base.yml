@@ -47,11 +47,12 @@ services:
       context: .
       dockerfile: base.Dockerfile
       target: base
-      # output: type=local,dest=${PROJECT_CACHE_DIR}/.buildx-cache
+      # Output the build as an OCI image
+      output:
+        type: "oci"
       # https://docs.docker.com/reference/cli/docker/buildx/build/#cache-to
       cache_to:
         - type=local,dest=${PROJECT_CACHE_DIR}/.buildx-cache
-      # Uncomment the following lines to specify platforms for the build
       platforms:
         - "linux/arm64"
       # - "linux/amd64"
@@ -59,7 +60,7 @@ services:
       # Arguments to pass to the build process
       # Reference: https://docs.docker.com/compose/compose-file/compose-file-v3/#args
       args:
-        - DEBIAN_IMAGE_VERSION=${DEBIAN_IMAGE_VERSION:-bookworm-20240812}
+        - DEBIAN_IMAGE_VERSION=${DEBIAN_IMAGE_VERSION:-@sha256:21887a619d762d236e7c66666ca657622ed8749e788322400b86ab09283d8fba}
 
     # Environment file containing environment variables for the base service
     # Documentation: https://docs.docker.com/compose/compose-file/compose-file-v3/#env_file

@@ -25,12 +25,25 @@ export \
     COMPOSE_EXPERIMENTAL=1 \
     BUILDKIT_CACHE_MOUNT_NS="sanctuary-cache-ns"
 
+# Function to check and ensure Docker Swarm is initialized
+ensure_docker_swarm() {
+    if ! docker info | grep -q 'Swarm: active'; then
+        echo "Docker Swarm is not active. Initializing Docker Swarm..."
+        docker swarm init || {
+            echo "Failed to initialize Docker Swarm."
+            exit 1
+        }
+        echo "Docker Swarm has been successfully initialized."
+    else
+        echo "Docker Swarm is already active."
+    fi
+}
+
 # Function to check if the Docker buildx builder exists and create it if necessary
 ensure_buildx_builder() {
     local _builder_name
     _builder_name="$1"
 
-    # Check if the builder already exists
     if docker buildx inspect "${_builder_name}" > /dev/null 2>&1; then
         echo "Builder '${_builder_name}' already exists. Setting it as the default builder."
     else
@@ -39,23 +52,18 @@ ensure_buildx_builder() {
             --name "${_builder_name}" \
             --driver docker-container \
             --use --bootstrap
+        echo "Builder '${_builder_name}' created and set as default."
     fi
-
-# docker buildx create --name=container \
-# --driver=docker-container \
-# --buildkitd-flags '--debug' \
-# --use --bootstrap
-
-    # Ensure the builder is being used
     docker buildx use "${_builder_name}"
 }
 
-# Call the function
-ensure_buildx_builder "${BUILDX_BUILDER:-"container-builder"}"
-# docker context use default
-# docker buildx use default
+# Check and ensure Docker Swarm is active
+ensure_docker_swarm
 
-echo "Builder: $(docker buildx inspect)"
+# Check and ensure the Docker Buildx builder
+ensure_buildx_builder "${BUILDX_BUILDER:-"container-builder"}"
+
+echo "Builder: $(docker buildx inspect --builder "${BUILDX_BUILDER:-"container-builder"}")"
 
 docker compose \
 --file sanctuary.yml \

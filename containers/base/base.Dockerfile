@@ -48,7 +48,7 @@ LABEL \
     org.opencontainers.image.revision="abc1234" \
     org.opencontainers.image.vendor="Example, Inc." \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.title="My Custom Image" \
+    org.opencontainers.image.title="${COMPOSE_PROJECT_NAME}" \
     org.opencontainers.image.description="This image is used for..." \
     org.opencontainers.image.base.name="debian:bookworm" \
     org.opencontainers.image.target.platform="${TARGETPLATFORM}" \
@@ -61,7 +61,6 @@ LABEL \
     org.opencontainers.image.build.variant="${BUILDVARIANT}"
 
 # Arguments with default values.
-# @see: https://docs.docker.com/reference/dockerfile/#arg
 ARG SANCTUARY_USER=sanctuary
 ARG SANCTUARY_GROUP=sanctuary
 ARG SANCTUARY_UID=65532
@@ -109,25 +108,32 @@ USER root
 # Set safer shell options for script execution.
 SHELL ["/bin/bash", "-o", "errexit", "-o", "errtrace", "-o", "functrace", "-o", "nounset", "-o", "pipefail", "-c"]
 
-RUN mkdir -p ${SANCTUARY_HOME} \
-    && mkdir -p ${SANCTUARY_BIN} \
-    && mkdir -p ${SANCTUARY_CONFIG} \
-    && mkdir -p ${SANCTUARY_TOOLS_BIN} \
-    && mkdir -p ${SANCTUARY_HARDENING_BIN} \
-    && mkdir -p ${SANCTUARY_LOGS} \
-    && mkdir -p ${SANCTUARY_DATA}
+# Create necessary directories and set permissions.
+RUN mkdir --parents ${SANCTUARY_HOME} \
+    && mkdir --parents ${SANCTUARY_BIN} \
+    && mkdir --parents ${SANCTUARY_CONFIG} \
+    && mkdir --parents ${SANCTUARY_TOOLS_BIN} \
+    && mkdir --parents ${SANCTUARY_HARDENING_BIN} \
+    && mkdir --parents ${SANCTUARY_LOGS} \
+    && mkdir --parents ${SANCTUARY_DATA} \
+    # Set ownership to the sanctuary user and group
+    && chown --recursive ${SANCTUARY_USER}:${SANCTUARY_GROUP} ${SANCTUARY_HOME} \
+    # Set permissions: read, write, and execute for owner, and read-only for group and others
+    && chmod --recursive 700 ${SANCTUARY_HOME} \
+    # Allow execution of binaries and scripts
+    && chmod --recursive 755 ${SANCTUARY_BIN}
 
 # Create a non-root user with specific configurations.
 RUN groupadd \
-    --gid ${SANCTUARY_GID} ${SANCTUARY_GROUP} \
+    --gid ${SANCTUARY_GID} \
+    --force ${SANCTUARY_GROUP} \
     && useradd \
     --no-log-init \
     --create-home \
     --uid ${SANCTUARY_UID} \
     --gid ${SANCTUARY_GID} \
     --comment "Non-root User for Running Applications" \
-    --home ${SANCTUARY_HOME} \
-    --skel /etc/skel \
+    --home-dir ${SANCTUARY_HOME} \
     --shell /usr/sbin/nologin \
     ${SANCTUARY_USER}
 

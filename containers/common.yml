@@ -37,38 +37,41 @@ x-settings: &settings
   init: true
   pull_policy: missing
   attach: true
-  # cap_drop:
-  #   - ALL
-  privileged: false
+
+  # DNS options for containers
   # dns_opt:
   #   - use-vc
   #   - no-tld-query
   #   - single-request
   #   - rotate
   #   - timeout:2
-  platform: linux/arm64
-  <<: *labels
 
+  # Platform specification for building container images
+  platform: linux/arm64
+
+# Define common build settings for services using Docker
 x-build: &build_defaults
   context: .
   dockerfile: Dockerfile
   platforms:
     - "linux/arm64"
 
-  # https://docs.docker.com/reference/compose-file/build/#pull
+  # Whether to pull the latest version of the image
   pull: false
 
-  # https://docs.docker.com/reference/compose-file/build/#no_cache
+  # Whether to use the cache during the build
   no_cache: true
 
-  # https://docs.docker.com/reference/compose-file/build/#privileged
+  # Whether the build process is executed in a privileged container
   privileged: false
 
-  # https://docs.docker.com/reference/compose-file/build/#ssh
+  # SSH options for the build (commented out)
   # ssh: ["default"]
+
+  # Inherit common labels
   <<: *labels
 
-# Define a common service that other services can inherit from.
+# Define a common service template that other services can inherit from
 services:
   common:
     # Inherit all common settings defined above
