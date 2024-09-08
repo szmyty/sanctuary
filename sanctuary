@@ -12,7 +12,7 @@
 # @Date         : 2024-08-22
 # @Version      : 1.0
 ######################################################################
-set -euox pipefail
+set -Eeuox pipefail
 
 # Export the DOCKER_BUILDKIT environment variable
 export \
