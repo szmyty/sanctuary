@@ -60,7 +60,7 @@ export \
         # DOCKER_DEFAULT_PLATFORM=linux/arm64 \
 
 # Function to setup Docker command with optional debug flags
-setup_docker_command() {
+setupdocker_command() {
     # Find the Docker executable path
     local docker_path
     docker_path=$(command -v docker)
@@ -72,18 +72,19 @@ setup_docker_command() {
     echo "Docker found at: ${docker_path}"
 
     # Start constructing the Docker command
-    local docker_cmd="${docker_path}"
+    local _docker_cmd="${docker_path}"
 
     # Check if debug is enabled via environment variable
     if [[ "${PROJECT_DEBUG:-0}" -eq 1 ]]; then
         echo "Enabling Docker debug mode."
-        docker_cmd="${docker_cmd} --log-level debug --debug"
+        args=(--debug --log-level "debug")
+        _docker_cmd="${_docker_cmd} ${args[*]}"
     fi
 
     # Export the docker command so it can be used globally in the script
-    export _DOCKER_COMMAND="${docker_cmd}"
+    export docker_command="${_docker_cmd}"
 }
-setup_docker_command
+setupdocker_command
 
 # Function to ensure containerd is enabled and running
 ensure_containerd_enabled() {
@@ -96,7 +97,7 @@ ensure_containerd_enabled() {
 
         # Command to check if containerd is active in Docker Desktop
         # Docker Desktop should manage containerd automatically; manual intervention is not typical
-        if ! ${_DOCKER_COMMAND} info | grep -q 'containerd'; then
+        if ! ${docker_command} info | grep -q 'containerd'; then
             echo "Containerd appears to be inactive or not properly configured in Docker Desktop."
             echo "Please check Docker Desktop settings or restart Docker."
         else
@@ -125,7 +126,7 @@ ensure_containerd_enabled() {
 
 # Function to check and ensure Docker Swarm is initialized
 ensure_docker_swarm() {
-    if ! ${_DOCKER_COMMAND} info | grep -q 'Swarm: active'; then
+    if ! ${docker_command} info | grep -q 'Swarm: active'; then
         echo "Docker Swarm is not active. Initializing Docker Swarm..."
         docker swarm init || {
             echo "Failed to initialize Docker Swarm."
@@ -142,11 +143,11 @@ ensure_buildx_builder() {
     local _builder_name
     _builder_name="$1"
 
-    if ${_DOCKER_COMMAND} buildx inspect "${_builder_name}" > /dev/null 2>&1; then
+    if ${docker_command} buildx inspect "${_builder_name}" > /dev/null 2>&1; then
         echo "Builder '${_builder_name}' already exists. Setting it as the default builder."
     else
         echo "Builder '${_builder_name}' does not exist. Creating and setting it as the default builder."
-        ${_DOCKER_COMMAND} buildx create \
+        ${docker_command} buildx create \
             --name "${_builder_name}" \
             --node "${_builder_name}-node" \
             --driver "docker-container" \
@@ -155,22 +156,22 @@ ensure_buildx_builder() {
             --bootstrap
         echo "Builder '${_builder_name}' created and set as default."
     fi
-    ${_DOCKER_COMMAND} buildx use "${_builder_name}"
+    ${docker_command} buildx use "${_builder_name}"
 }
 
 # Call the function
-ensure_containerd_enabled
+# ensure_containerd_enabled
 
 # Check and ensure the Docker Buildx builder
-ensure_buildx_builder "${BUILDX_BUILDER:-"container-builder"}"
+# ensure_buildx_builder "${BUILDX_BUILDER:-"container-builder"}"
 
-echo "Builder: $(${_DOCKER_COMMAND} buildx inspect --builder "${BUILDX_BUILDER:-"container-builder"}")"
+# echo "Builder: $(${docker_command} buildx inspect --builder "${BUILDX_BUILDER:-"container-builder"}")"
 
 # Check and ensure Docker Swarm is active
 # ensure_docker_swarm
 
 build_base_image() {
-    ${_DOCKER_COMMAND} --debug compose \
+    ${docker_command} compose \
         --file sanctuary.yml \
         --env-file sanctuary.env \
         --env-file containers/base/base.env \
@@ -186,7 +187,7 @@ start_services() {
 
     # Base Docker Compose command, broken into multiple lines for readability.
     cmd=(
-        "${_DOCKER_COMMAND}" "compose"
+        "${docker_command}" "compose"
         "--file" "sanctuary.yml"
         "--env-file" "sanctuary.env"
         "--env-file" "containers/base/base.env"
