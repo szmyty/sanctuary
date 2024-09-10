@@ -1,3 +1,4 @@
+---
 ######################################################################
 # @Project      : sanctuary
 # @File         : sanctuary.yml
@@ -29,12 +30,12 @@ include:
     project_directory: ${CONTAINERS_ROOT}/base
     env_file: ${CONTAINERS_ROOT}/base/base.env
 
-  # Include the Minio service Docker Compose file for object storage configuration.
-  - path: ${CONTAINERS_ROOT}/minio/minio.yml
-    project_directory: ${CONTAINERS_ROOT}/minio
-    env_file: ${CONTAINERS_ROOT}/minio/minio.env
+  # # Include the Minio service Docker Compose file for object storage configuration.
+  # - path: ${CONTAINERS_ROOT}/minio/minio.yml
+  #   project_directory: ${CONTAINERS_ROOT}/minio
+  #   env_file: ${CONTAINERS_ROOT}/minio/minio.env
 
-  # Include the TileDB service Docker Compose file for database configuration.
-  - path: ${CONTAINERS_ROOT}/tiledb/tiledb.yml
-    project_directory: ${CONTAINERS_ROOT}/tiledb
-    env_file: ${CONTAINERS_ROOT}/tiledb/tiledb.env
+  # # Include the TileDB service Docker Compose file for database configuration.
+  # - path: ${CONTAINERS_ROOT}/tiledb/tiledb.yml
+  #   project_directory: ${CONTAINERS_ROOT}/tiledb
+  #   env_file: ${CONTAINERS_ROOT}/tiledb/tiledb.env

@@ -1,3 +1,4 @@
+---
 ######################################################################
 # @Project      : sanctuary
 # @File         : common.yml
@@ -47,14 +48,14 @@ x-settings: &settings
   #   - timeout:2
 
   # Platform specification for building container images
-  platform: linux/arm64
+  # platform: linux/arm64
 
 # Define common build settings for services using Docker
 x-build: &build_defaults
   context: .
   dockerfile: Dockerfile
-  platforms:
-    - "linux/arm64"
+  # platforms:
+  #   - "linux/arm64"
 
   # Whether to pull the latest version of the image
   pull: false

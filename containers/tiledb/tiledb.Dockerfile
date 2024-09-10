@@ -37,13 +37,9 @@ ARG BASE_IMAGE_NAME=base
 # Image version to use.
 ARG BASE_IMAGE_VERSION=latest
 
-ARG TILEDB_PORT=6379
-
-# Installation prefix for TileDB to be installed at.
-ARG TILEDB_DATA_HOME=${SANCTUARY_DATA}/tiledb
-
 # Use a base image.
-FROM --platform=${BUILDPLATFORM} ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION} AS base
+FROM ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION} AS base
+# FROM --platform=${BUILDPLATFORM} ${PROJECT_NAME}/${BASE_IMAGE_NAME}:${BASE_IMAGE_VERSION} AS base
 
 LABEL stage="base"
 LABEL description="Base stage with necessary dependencies for building TileDB."
@@ -51,7 +47,17 @@ LABEL description="Base stage with necessary dependencies for building TileDB."
 # Switch to root user to install required dependencies.
 USER root
 
-ENV PATH="${TILEDB_DATA_HOME}/bin:${PATH}"
+# Installation prefix for TileDB to be installed at.
+ARG TILEDB_DATA_HOME=${SANCTUARY_DATA}/tiledb
+ARG TILEDB_PY_DATA_HOME=${TILEDB_DATA_HOME}/TileDB-Py
+ARG VIRTUAL_ENV=${TILEDB_PY_DATA_HOME}/.venv
+
+# Set environment variables.
+ENV TILEDB_DATA_HOME=${TILEDB_DATA_HOME} \
+    TILEDB_PY_DATA_HOME=${TILEDB_PY_DATA_HOME} \
+    VIRTUAL_ENV=${VIRTUAL_ENV}
+
+ENV PATH="${VIRTUAL_ENV}/bin:${TILEDB_DATA_HOME}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${TILEDB_DATA_HOME}/lib:${LD_LIBRARY_PATH}"
 
 # Install required dependencies for the build.
@@ -90,8 +96,12 @@ ARG TILEDB_VER_MINOR=25
 ARG TILEDB_VER_PATCH=0
 ARG TILEDB_REPO_URL="https://github.com/TileDB-Inc/TileDB.git"
 
-ARG CXX=g++
+# Setting the compilers to use.
 ARG CC=gcc
+ARG CXX=g++
+ENV CC=${CC}
+ENV CXX=${CXX}
+
 ARG COMPILER_SUPPORTS_AVX2=FALSE
 ARG CMAKE_BUILD_TYPE="Release"
 ARG CMAKE_INSTALL_PREFIX=${TILEDB_DATA_HOME}
@@ -102,8 +112,8 @@ ARG TILEDB_AZURE="OFF"
 ARG TILEDB_GCS="OFF"
 ARG TILEDB_HDFS="OFF"
 ARG TILEDB_WERROR="OFF"
-ARG CMAKE_C_COMPILER=$(which gcc)
-ARG CMAKE_CXX_COMPILER=$(which g++)
+ARG CMAKE_C_COMPILER=$(which ${CC})
+ARG CMAKE_CXX_COMPILER=$(which ${CXX})
 ARG TILEDB_ASSERTIONS="OFF"
 ARG TILEDB_CPP_API="ON"
 ARG TILEDB_STATS="ON"
@@ -122,10 +132,6 @@ ARG TILEDB_BUILD_PROC=2
 ENV TILEDB_VERSION="${TILEDB_VER_MAJOR}.${TILEDB_VER_MINOR}.${TILEDB_VER_PATCH}"
 
 WORKDIR ${TMPDIR}/tiledb
-
-# Setting the compilers
-ENV CXX=${CXX}
-ENV CC=${CC}
 
 # Clone the TileDB repository and configure the build.
 RUN git clone \
@@ -170,6 +176,8 @@ RUN git clone \
     && ninja --verbose -j${TILEDB_BUILD_PROC} examples \
     && ldconfig
 
+WORKDIR ${SANCTUARY_HOME}
+
 ######################################################################
 # Stage 3: Build TileDB-Py
 # This stage clones the TileDB-Py repository and installs the Python bindings.
@@ -192,18 +200,16 @@ ARG TILEDB_PY_VER_PATCH=1
 ARG TILEDB_PY_REPO_URL="https://github.com/TileDB-Inc/TileDB-Py.git"
 
 ENV TILEDB_PY_VERSION="${TILEDB_PY_VER_MAJOR}.${TILEDB_PY_VER_MINOR}.${TILEDB_PY_VER_PATCH}"
-ENV VIRTUAL_ENV=${SANCTUARY_HOME}/.venv
-ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
 WORKDIR ${TMPDIR}/tiledb-py
 
 # Install Python3 venv package, clone the TileDB-Py repository, and install the Python bindings in a virtual environment.
 RUN apt-get update && apt-get install --yes python3-venv \
     && python3 -m venv ${VIRTUAL_ENV} \
-    && git clone --quiet --recurse-submodules --branch ${TILEDB_PY_VERSION} ${TILEDB_PY_REPO_URL} .
-#     && pip install --upgrade pip \
-#     && pip install --requirement requirements.txt \
-#     && python setup.py install --tiledb=/usr/local
+    && git clone --quiet --recurse-submodules --branch ${TILEDB_PY_VERSION} ${TILEDB_PY_REPO_URL} . \
+    && pip3 install --upgrade pip \
+    && pip3 install --requirement requirements.txt \
+    && python3 setup.py install --tiledb=${TILEDB_DATA_HOME}
 
 # # Clean up APT when done.
 # RUN apt-get remove -y python3-venv && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -213,17 +219,17 @@ RUN apt-get update && apt-get install --yes python3-venv \
 # This stage copies the necessary files from the build stages and prepares the final image.
 ######################################################################
 # FROM base AS final
-FROM  build-tiledb-py as final
+FROM build-tiledb-py as final
 
 LABEL stage="final"
 LABEL description="Final stage with TileDB and TileDB-Py installed."
 
 # Copy TileDB and TileDB-Py installations from the build stages.
-# COPY --from=build-tiledb /usr/local /usr/local
-# COPY --from=build-tiledb-py /usr/local /usr/local
+COPY --from=build-tiledb ${TILEDB_DATA_HOME} ${TILEDB_DATA_HOME}
+COPY --from=build-tiledb-py ${TILEDB_DATA_HOME} ${TILEDB_DATA_HOME}
 
-# Set the environment variable to ensure the correct libraries are found.
-ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
+# Copy the scripts from the local bin directory to overwrite the container's bin directory.
+COPY --chown=${SANCTUARY_USER}:${SANCTUARY_GROUP} --chmod=500 bin ${SANCTUARY_BIN}
 
 # Set working directory.
 WORKDIR ${SANCTUARY_HOME}

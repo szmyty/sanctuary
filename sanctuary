@@ -11,23 +11,121 @@
 # @Author       : Alan Szmyt
 # @Date         : 2024-08-22
 # @Version      : 1.0
+# @References   :
+#   - https://www.gnu.org/software/bash/
+#   - https://www.gnu.org/software/bash/manual/bash.html
+#   - https://docs.docker.com/compose/cli-command/
+#   - https://docs.docker.com/compose/compose-file/
+#   - https://docs.docker.com/compose/reference/overview/
+#   - http://redsymbol.net/articles/unofficial-bash-strict-mode/
+#   - https://www.shellcheck.net/
+#   - https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html
+#   - https://tldp.org/LDP/abs/html/
+#   - https://pubs.opengroup.org/onlinepubs/9699919799/utilities/contents.html
+#   - https://man7.org/linux/man-pages/man7/signal.7.html
+#   - http://redsymbol.net/articles/bash-exit-traps/
+#   - https://mywiki.wooledge.org/BashGuide/Practices
+#   - https://bertvv.github.io/cheat-sheets/Bash.html
+#   - https://google.github.io/styleguide/shellguide.html
 ######################################################################
-set -Eeuox pipefail
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+set -o pipefail  # don't hide errors within pipes
+IFS=$'\n\t'
+
+# Built-In Variables
+# For reference
+# $0   name of the script
+# $n   positional parameters to script/function
+# $$   PID of the script
+# $!    PID of the last command executed (and run in the background)
+# $?   exit status of the last command  (${PIPESTATUS} for pipelined commands)
+# $#   number of parameters to script/function
+# $@  all parameters to script/function (sees arguments as separate word)
+# $*    all parameters to script/function (sees arguments as single word)
+# Note
+# $*   is rarely the right choice.
+# $@ handles empty parameter list and white-space within parameters correctly
+# $@
 
 # Export the DOCKER_BUILDKIT environment variable
 export \
     DOCKER_BUILDKIT=1 \
     BUILDX_EXPERIMENTAL=1 \
     BUILDKIT_MULTI_PLATFORM=1 \
-    PROJECT_CACHE_DIR="./.cache/buildx" \
-    COMPOSE_DOCKER_CLI_BUILD=1 \
-    DOCKER_DEFAULT_PLATFORM=linux/arm64 \
     COMPOSE_EXPERIMENTAL=1 \
-    BUILDKIT_CACHE_MOUNT_NS="sanctuary-cache-ns"
+    BUILDKIT_PROGRESS=plain \
+    PROJECT_DEBUG=1
+        # BUILDKIT_CACHE_MOUNT_NS="sanctuary-cache-ns" \
+        # DOCKER_DEFAULT_PLATFORM=linux/arm64 \
+
+# Function to setup Docker command with optional debug flags
+setup_docker_command() {
+    # Find the Docker executable path
+    local docker_path
+    docker_path=$(command -v docker)
+    if [[ -z "${docker_path}" ]]; then
+        echo "Docker is not installed or not in the PATH."
+        return 1 # Exit the function with an error status
+    fi
+
+    echo "Docker found at: ${docker_path}"
+
+    # Start constructing the Docker command
+    local docker_cmd="${docker_path}"
+
+    # Check if debug is enabled via environment variable
+    if [[ "${PROJECT_DEBUG:-0}" -eq 1 ]]; then
+        echo "Enabling Docker debug mode."
+        docker_cmd="${docker_cmd} --log-level debug --debug"
+    fi
+
+    # Export the docker command so it can be used globally in the script
+    export _DOCKER_COMMAND="${docker_cmd}"
+}
+setup_docker_command
+
+# Function to ensure containerd is enabled and running
+ensure_containerd_enabled() {
+    echo "Checking the current status of containerd..."
+
+    # Check if running on Docker Desktop or a Linux system with Docker Engine
+    if [[ -f "/Applications/Docker.app/Contents/Resources/bin/docker" ]]; then
+        # Docker Desktop (MacOS)
+        echo "Docker Desktop detected."
+
+        # Command to check if containerd is active in Docker Desktop
+        # Docker Desktop should manage containerd automatically; manual intervention is not typical
+        if ! ${_DOCKER_COMMAND} info | grep -q 'containerd'; then
+            echo "Containerd appears to be inactive or not properly configured in Docker Desktop."
+            echo "Please check Docker Desktop settings or restart Docker."
+        else
+            echo "Containerd is active in Docker Desktop."
+        fi
+    elif command -v systemctl &> /dev/null; then
+        # Linux Docker Engine
+        echo "Systemd found, assuming Linux environment with Docker Engine."
+
+        # Check if containerd service is active
+        if ! systemctl is-active --quiet containerd; then
+            echo "Containerd is not active. Attempting to start containerd..."
+            sudo systemctl start containerd
+
+            # Enable containerd to start at boot
+            sudo systemctl enable containerd
+            echo "Containerd has been started and enabled."
+        else
+            echo "Containerd is already active and running."
+        fi
+    else
+        echo "Neither Docker Desktop nor a standard Linux Docker Engine environment detected."
+        echo "Manual verification required."
+    fi
+}
 
 # Function to check and ensure Docker Swarm is initialized
 ensure_docker_swarm() {
-    if ! docker info | grep -q 'Swarm: active'; then
+    if ! ${_DOCKER_COMMAND} info | grep -q 'Swarm: active'; then
         echo "Docker Swarm is not active. Initializing Docker Swarm..."
         docker swarm init || {
             echo "Failed to initialize Docker Swarm."
@@ -44,65 +142,81 @@ ensure_buildx_builder() {
     local _builder_name
     _builder_name="$1"
 
-    if docker buildx inspect "${_builder_name}" > /dev/null 2>&1; then
+    if ${_DOCKER_COMMAND} buildx inspect "${_builder_name}" > /dev/null 2>&1; then
         echo "Builder '${_builder_name}' already exists. Setting it as the default builder."
     else
         echo "Builder '${_builder_name}' does not exist. Creating and setting it as the default builder."
-        docker buildx create \
+        ${_DOCKER_COMMAND} buildx create \
             --name "${_builder_name}" \
-            --driver docker-container \
-            --use --bootstrap
+            --node "${_builder_name}-node" \
+            --driver "docker-container" \
+            --driver-opt "default-load=true" \
+            --use \
+            --bootstrap
         echo "Builder '${_builder_name}' created and set as default."
     fi
-    docker buildx use "${_builder_name}"
+    ${_DOCKER_COMMAND} buildx use "${_builder_name}"
 }
 
-# Check and ensure Docker Swarm is active
-ensure_docker_swarm
+# Call the function
+ensure_containerd_enabled
 
 # Check and ensure the Docker Buildx builder
 ensure_buildx_builder "${BUILDX_BUILDER:-"container-builder"}"
 
-echo "Builder: $(docker buildx inspect --builder "${BUILDX_BUILDER:-"container-builder"}")"
+echo "Builder: $(${_DOCKER_COMMAND} buildx inspect --builder "${BUILDX_BUILDER:-"container-builder"}")"
 
-docker compose \
---file sanctuary.yml \
---env-file sanctuary.env \
---env-file containers/base/base.env \
---parallel 1 \
---ansi always \
-build base
+# Check and ensure Docker Swarm is active
+# ensure_docker_swarm
 
-# Array of services to bring up. Add more services here as needed.
-services=("tiledb")
+build_base_image() {
+    ${_DOCKER_COMMAND} --debug compose \
+        --file sanctuary.yml \
+        --env-file sanctuary.env \
+        --env-file containers/base/base.env \
+        --parallel 1 \
+        --ansi auto \
+        --progress plain \
+        build base
+}
 
-# Base Docker Compose command, broken into multiple lines for readability.
-cmd=(
-  "docker" "compose"
-  "--file" "sanctuary.yml"
-  "--env-file" "sanctuary.env"
-  "--env-file" "containers/base/base.env"
-  "--env-file" "containers/redis/redis.env"
-  "--env-file" "containers/tiledb/tiledb.env"
-  "--env-file" "containers/minio/minio.env"
-  "--parallel" "1"
-  "--ansi" "always"
-  "up"
-  "--build"
-  "--force-recreate"
-  "--remove-orphans"
-)
+start_services() {
+    # Array of services to bring up. Add more services here as needed.
+    services=("tiledb")
 
-# Add services to the command, with --no-deps to skip dependency services.
-for service in "${services[@]}"; do
-  cmd+=("--no-deps" "${service}")
-done
+    # Base Docker Compose command, broken into multiple lines for readability.
+    cmd=(
+        "${_DOCKER_COMMAND}" "compose"
+        "--file" "sanctuary.yml"
+        "--env-file" "sanctuary.env"
+        "--env-file" "containers/base/base.env"
+        "--env-file" "containers/redis/redis.env"
+        "--env-file" "containers/tiledb/tiledb.env"
+        "--env-file" "containers/minio/minio.env"
+        "--parallel" "1"
+        "--ansi" "auto"
+        "up"
+        "--build"
+        "--force-recreate"
+        "--remove-orphans"
+    )
+    # Add services to the command, with --no-deps to skip dependency services.
+    for service in "${services[@]}"; do
+        cmd+=("--no-deps" "${service}")
+    done
 
-# Append any additional arguments passed to the script.
-cmd+=("$@")
+    # Append any additional arguments passed to the script.
+    cmd+=("$@")
 
-# Echo the final command for visibility.
-echo "Executing: ${cmd[*]}"
+    # Echo the final command for visibility.
+    echo "Executing: ${cmd[*]}"
 
-# Execute the final command.
-"${cmd[@]}"
+    # Execute the final command.
+    "${cmd[@]}"
+}
+
+build_base_image
+
+
+
+# if [[ "${TRACE-0}" == "1" ]];

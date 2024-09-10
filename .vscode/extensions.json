@@ -11,6 +11,7 @@
         "adamhartford.vscode-base64",
         "tal7aouy.rainbow-bracket",
         "chrmarti.regex",
-        "equinusocio.vsc-material-theme-icons"
+        "equinusocio.vsc-material-theme-icons",
+        "tamasfe.even-better-toml"
     ]
 }

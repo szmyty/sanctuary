@@ -5,6 +5,7 @@
         }
     ],
     "settings": {
+        "search.followSymlinks": false,
         "editor.minimap.enabled": false,
         "editor.wordWrap": "on",
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -137,8 +138,10 @@
             "*.mailmap": "plaintext"
         },
         "cSpell.words": [
+            "buildx",
             "commitizen",
             "commitlint",
+            "ipam",
             "minio",
             "Mulan",
             "shellcheck",
