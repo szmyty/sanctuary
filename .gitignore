@@ -4097,6 +4097,9 @@ terraform.rc
 *.cb2
 .*.lb
 
+# Save dictionaries.
+!*ltex.dictionary.*
+
 ## Intermediate documents:
 *.dvi
 *.xdv

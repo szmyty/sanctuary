@@ -1,0 +1,126 @@
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{natbib}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{titlesec}
+\usepackage{lipsum}
+
+% Custom header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Technical Report: Docker Environment Research \& Progress}
+\fancyfoot[C]{\thepage}
+
+% Title formatting
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+
+% Title
+\title{Technical Report: Docker Environment Research, Multi-Stage Build Preparation, and Next Steps}
+\author{Alan Szmyt}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report outlines the research, progress, and next steps in developing a Docker-based infrastructure, focusing on reproducibility, multi-stage builds, and scalability. Tools like Docker Buildx, Docker Bake, Ansible, Terraform, and Earthly are explored in the context of how they can enhance the development process. The report also provides a detailed roadmap for integrating TileDB, MariaDB, and other services.
+\end{abstract}
+
+\tableofcontents
+
+\section{Overview}
+Over the past few days, I have refreshed my knowledge on Docker and explored various tools and features to lay the foundation for our Docker infrastructure. This research provides a roadmap for managing our environment effectively while identifying potential areas for expansion, such as Kubernetes and multi-platform builds.
+
+I have also investigated tools like Ansible, Terraform, and Earthly to assess their potential roles. Although these tools won’t be immediately implemented, the knowledge gained will inform future decisions. Below is a detailed breakdown of my findings, progress, and the next steps.
+
+\section{Research Findings}
+
+\subsection{Docker Buildx}
+\href{https://docs.docker.com/buildx/working-with-buildx/}{Docker Buildx} is a powerful tool that supports multi-platform builds and other advanced features. While I have set up Buildx for our project, the implementation of multi-platform builds will be deferred to a later phase. Buildx's flexibility will allow us to build for various architectures, which will be key for cross-platform compatibility in the future.
+
+\subsection{Docker Bake}
+\href{https://docs.docker.com/engine/context/using_bake/}{Docker Bake} simplifies handling complex builds by grouping services and managing multiple Compose files. While this tool could streamline our workflows as the environment grows more complex, the immediate focus remains on establishing a stable foundation.
+
+\subsection{Reproducible Builds}
+Reproducibility is a critical aspect of this project. I have focused on pinning dependencies (e.g., base images like \href{https://hub.docker.com/_/debian}{Debian}) to ensure the Docker environment remains consistent over time and across machines.
+
+\subsection{Docker Swarm \& Kubernetes}
+Docker Swarm has been selected as a testing ground for service orchestration before moving to Kubernetes. In the future, Kubernetes (\href{https://kubernetes.io/}{Kubernetes}) will be considered for scalability and flexibility.
+
+\subsection{Ansible for Docker Builds}
+\href{https://www.ansible.com/}{Ansible} has the potential to manage Docker builds both externally and within a \href{https://docs.docker.com/engine/reference/builder/}{Dockerfile}. For now, Ansible’s capabilities in multi-platform builds and dependency management are noted for future consideration.
+
+\subsection{Terraform for Infrastructure as Code}
+\href{https://www.terraform.io/}{Terraform} offers infrastructure-as-code (IaC) capabilities, enabling predictable and automated cloud provisioning. While not yet implemented, Terraform will be crucial when the infrastructure scales.
+
+\subsection{Earthly for Build Management}
+\href{https://earthly.dev/}{Earthly} simplifies reproducible builds and modular build management. While it won’t be implemented immediately, Earthly is noted as a future option for handling more complex builds.
+
+\subsection{APT \& DPKG Package Configuration}
+Research into APT and DPKG has been conducted to optimize package management in Docker builds. Customizing APT configurations (\href{https://manpages.ubuntu.com/manpages/focal/en/man5/apt.conf.5.html}{APT Conf}) and using DPKG (\href{https://manpages.ubuntu.com/manpages/focal/en/man1/dpkg.1.html}{DPKG}) will help maintain efficiency and security within Docker images.
+
+\section{Current Progress}
+
+\subsection{Base Image \& Flexibility}
+The base image has been optimized for flexibility, offering customizable settings via environment variables. The image is nearly ready for final testing, with TileDB properly installed and configured.
+
+\subsection{TileDB Installation}
+\href{https://docs.tiledb.com/main/}{TileDB} has been successfully installed. The next steps involve setting up \href{https://mariadb.org/}{MariaDB} for connection to TileDB, while \href{https://neo4j.com/}{Neo} will serve as the local storage backend.
+
+\subsection{Bash Script \& Environment Setup}
+The bash script for environment setup has been streamlined for ease of use in various environments. The next focus will be finalizing the setup for TileDB and MariaDB.
+
+\subsection{Multi-Stage Build Preparation}
+Although \href{https://docs.docker.com/buildx/working-with-buildx/}{Buildx} has been configured, multi-platform builds will be implemented later. The priority is to establish communication between all services before optimizing for multiple platforms.
+
+\section{Lessons Learned}
+\begin{enumerate}
+    \item \textbf{Tool Selection:} Tools like Docker Bake and Buildx offer powerful options, but focusing on immediate needs is essential.
+    \item \textbf{Ansible \& Terraform:} Ansible is great for managing configurations, while Terraform excels at infrastructure-as-code for larger-scale deployments.
+    \item \textbf{APT \& DPKG Configuration:} Optimizing package installation is crucial for maintaining lightweight, secure images.
+\end{enumerate}
+
+\section{Next Steps}
+\begin{enumerate}
+    \item Finalize base image with TileDB.
+    \item Set up MariaDB for local testing and connection to TileDB.
+    \item Prepare for Docker Swarm testing before considering Kubernetes.
+    \item Implement security hardening measures.
+\end{enumerate}
+
+\section{Main References}
+\begin{itemize}
+    \item Docker Buildx: \href{https://docs.docker.com/buildx/working-with-buildx/}{https://docs.docker.com/buildx/working-with-buildx/}
+    \item Docker Bake: \href{https://docs.docker.com/engine/context/using_bake/}{https://docs.docker.com/engine/context/using\_bake/}
+    \item Debian Base Image: \href{https://hub.docker.com/_/debian}{https://hub.docker.com/\_/debian}
+    \item TileDB: \href{https://docs.tiledb.com/main/}{https://docs.tiledb.com/main/}
+    \item MariaDB: \href{https://mariadb.org/}{https://mariadb.org/}
+    \item Neo: \href{https://neo4j.com/}{https://neo4j.com/}
+    \item APT Configuration: \href{https://manpages.ubuntu.com/manpages/focal/en/man5/apt.conf.5.html}{https://manpages.ubuntu.com/manpages/focal/en/man5/apt.conf.5.html}
+    \item DPKG Configuration: \href{https://manpages.ubuntu.com/manpages/focal/en/man1/dpkg.1.html}{https://manpages.ubuntu.com/manpages/focal/en/man1/dpkg.1.html}
+    \item Ansible: \href{https://www.ansible.com/}{https://www.ansible.com/}
+    \item Terraform: \href{https://www.terraform.io/}{https://www.terraform.io/}
+    \item Earthly: \href{https://earthly.dev/}{https://earthly.dev/}
+\end{itemize}
+
+\section{Additional Resources}
+Below are some additional resources that can be explored later:
+
+\begin{itemize}
+    \item \href{https://github.com/docker/dockerfile}{https://github.com/docker/dockerfile}
+    \item \href{https://hub.docker.com/r/docker/dockerfile}{https://hub.docker.com/r/docker/dockerfile}
+\end{itemize}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
