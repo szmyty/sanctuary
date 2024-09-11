@@ -11,7 +11,10 @@ services:
       file: ../common.yml
       service: common
     depends_on:
-      - base
+      base:
+        condition: service_started
+        restart: false
+        required: true
       # - minio
     image: ${COMPOSE_PROJECT_NAME}/${TILEDB_IMAGE_NAME}:${TILEDB_IMAGE_TAG}
     hostname: ${COMPOSE_PROJECT_NAME}.${TILEDB_HOSTNAME}
