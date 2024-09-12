@@ -8,11 +8,19 @@ build-backend = "poetry.core.masonry.api"
 # Project metadata
 # Docs: https://python-poetry.org/docs/pyproject/#toolpoetryname
 package-mode = false
-name = "sanctuary"
-version = "0.0.1"
-description = ""
-authors = ["Alan Szmyt <szmyty@gmail.com>"]
+# name = "sanctuary"
+# version = "0.0.1"
+# description = ""
+# authors = ["Alan Szmyt <szmyty@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "**/*.py", from = "scripts", to = "licenses", format = "sdist" },
+    { include = "**/*.py", from = "scripts", to = "licenses", format = "wheel" },
+    # { include = "extra_package" },
+]
+
+[tool.poetry.scripts]
+licenses = "scripts.licenses:main"
 
 [tool.poetry.dependencies]
 # Project dependencies
@@ -61,6 +69,7 @@ poethepoet = "^0.19.0"
 objsize = "^0.7.0"
 sqids = "^0.3.0"
 pylatex = "^1.4.2"
+opensource = "^1.0.2"
 
 [tool.poetry.group.dev.dependencies]
 # Development dependencies
@@ -155,6 +164,9 @@ voila = "^0.4.0"
 # Define custom commands to be run using poetry-exec-plugin
 # Docs: https://github.com/python-poetry/poetry-exec-plugin
 greet = "poetry run poe greet"
+
+[tool.poetry.plugins.dotenv]
+location = "sanctuary.env"
 
 [tool.jupyter.kernel]
 # Jupyter kernel configuration

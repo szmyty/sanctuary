@@ -41,7 +41,7 @@ ARG BUILDOS
 ARG BUILDARCH
 ARG BUILDVARIANT
 
-FROM debian:${DEBIAN_IMAGE_VERSION} AS base
+FROM debian:${DEBIAN_IMAGE_VERSION} AS setup
 # FROM --platform=${BUILDPLATFORM} debian:${DEBIAN_IMAGE_VERSION} AS setup
 
 RUN echo "Base image version: ${BASE_IMAGE_VERSION}"
@@ -105,8 +105,6 @@ ENV SANCTUARY_UID=65532
 ENV SANCTUARY_GID=65532
 ENV SANCTUARY_HOME=/home/${SANCTUARY_USER}
 ENV SANCTUARY_BIN=${SANCTUARY_HOME}/bin
-ENV SANCTUARY_TOOLS_BIN=${SANCTUARY_BIN}/tools
-ENV SANCTUARY_HARDENING_BIN=${SANCTUARY_BIN}/hardening
 ENV SANCTUARY_CONFIG=${SANCTUARY_HOME}/config
 ENV SANCTUARY_LOGS=${SANCTUARY_HOME}/logs
 ENV SANCTUARY_DATA=${SANCTUARY_HOME}/data
@@ -144,17 +142,11 @@ SHELL ["/bin/bash", "-o", "errexit", "-o", "errtrace", "-o", "functrace", "-o", 
 
 # Create necessary directories and set permissions.
 RUN mkdir --parents ${SANCTUARY_HOME} \
-    && mkdir --parents ${SANCTUARY_BIN} \
-    && mkdir --parents ${SANCTUARY_TOOLS_BIN} \
-    && mkdir --parents ${SANCTUARY_HARDENING_BIN} \
-    && mkdir --parents ${SANCTUARY_CONFIG} \
-    && mkdir --parents ${SANCTUARY_LOGS} \
-    && mkdir --parents ${SANCTUARY_DATA} \
+    ${SANCTUARY_BIN} ${SANCTUARY_CONFIG} ${SANCTUARY_LOGS} ${SANCTUARY_DATA} \
     # Set ownership to the sanctuary user and group
     && chown --recursive ${SANCTUARY_USER}:${SANCTUARY_GROUP} ${SANCTUARY_HOME} \
     # Set permissions: read, write, and execute for owner, and read-only for group and others
     && chmod --recursive 700 ${SANCTUARY_HOME} \
-    # Allow execution of binaries and scripts
     && chmod --recursive 755 ${SANCTUARY_BIN}
 
 # Create a non-root user with specific configurations.
@@ -214,6 +206,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     dnsutils \
     doxygen \
     git \
+    ghostscript \
     graphviz \
     htop \
     iputils-ping \
