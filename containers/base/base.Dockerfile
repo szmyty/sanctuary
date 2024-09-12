@@ -222,15 +222,22 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     libblosc-dev \
     libbz2-dev \
     libcurl4-openssl-dev \
+    libffi-dev \
     libksba8 \
     liblz4-dev \
+    liblzma-dev \
+    libreadline-dev \
     libpng-dev \
     libpng-tools \
+    libncursesw5-dev \
     libspdlog-dev \
+    libsqlite3-dev \
     libssl-dev \
     libtasn1-6 \
     libtiff-dev \
     libtool \
+    libxml2-dev \
+    libxmlsec1-dev \
     libzstd-dev \
     locales \
     locales-all \

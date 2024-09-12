@@ -7,16 +7,17 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 # Project metadata
 # Docs: https://python-poetry.org/docs/pyproject/#toolpoetryname
-name = "rarbuddy"
+package-mode = false
+name = "sanctuary"
 version = "0.0.1"
-description = "A tool for managing and extracting .rar files with part support."
+description = ""
 authors = ["Alan Szmyt <szmyty@gmail.com>"]
-readme = "README.md"  # Path to the README file
+readme = "README.md"
 
 [tool.poetry.dependencies]
 # Project dependencies
 # Docs: https://python-poetry.org/docs/pyproject/#dependencies
-python = ">=3.10,<3.12"  # Specifies supported Python versions
+python = ">=3.10,<3.13"  # Specifies supported Python versions
 
 # Example dependencies
 art = "^5.9"
@@ -40,7 +41,7 @@ plotly = "^5.14.1"
 plotly-geo = "^1.0.0"
 pydantic = "^1.10.6"
 pyjanitor = "^0.24.0"
-pylatex = "1.4.0"
+# pylatex = "1.4.0"
 pytest = "^7.2.2"
 scikit-learn = "^1.2.2"
 scipy = "^1.10.1"
@@ -59,6 +60,7 @@ pydot = "^1.4.2"
 poethepoet = "^0.19.0"
 objsize = "^0.7.0"
 sqids = "^0.3.0"
+pylatex = "^1.4.2"
 
 [tool.poetry.group.dev.dependencies]
 # Development dependencies
@@ -156,8 +158,8 @@ greet = "poetry run poe greet"
 
 [tool.jupyter.kernel]
 # Jupyter kernel configuration
-name = "rarbuddy-kernel"
-display = "rarbuddy Jupyter Kernel"
+name = "sanctuary-kernel"
+display = "sanctuary Jupyter Kernel"
 
 [tool.commitizen]
 # Configuration for commitizen, a tool for managing conventional commits
@@ -173,8 +175,8 @@ version_files = ["pyproject.toml:version"]
 # Docs: https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
 minversion = "7.0"
 pythonpath = "."
-testpaths = ["rarbuddy/tests"]
-norecursedirs = ["rarbuddy/tests/helpers"]
+testpaths = ["sanctuary/tests"]
+norecursedirs = ["sanctuary/tests/helpers"]
 cache_dir = ".cache/.pytest_cache"
 addopts = "--color=yes --doctest-modules --exitfirst --failed-first --strict-config --strict-markers --verbosity=2"
 xfail_strict = true
@@ -347,7 +349,7 @@ unfixable = ["F401"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["I001"]
-"rarbuddy/tests/test_rarbuddy.py" = ["S101"]
+"sanctuary/tests/test_sanctuary.py" = ["S101"]
 
 [tool.ruff.pydocstyle]
 # Pydocstyle configuration for docstring style checking
@@ -424,7 +426,7 @@ safe_licenses = [
 unsafe_packages = [
     "kneed",
     "pytoolconfig",
-    "rarbuddy",
+    "sanctuary",
     "python-lsp-jsonrpc",
     "ypy-websocket",
     "flynt"
