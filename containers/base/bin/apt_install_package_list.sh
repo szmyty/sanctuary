@@ -15,7 +15,7 @@ set -euo pipefail
 
 # Check if the package list file is provided as an argument
 if [[ "$#" -ne 1 ]]; then
-    echo "Usage: $0 <path_to_package_list>"
+    echo "Usage: ${0} <path_to_package_list>"
     exit 1
 fi
 

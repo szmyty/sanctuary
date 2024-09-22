@@ -24,8 +24,8 @@ services:
       context: .
       dockerfile: tiledb.Dockerfile
       target: final
-      cache_from:
-        - type=local,src=${PROJECT_CACHE_DIR}/.buildx-cache
+      # cache_from:
+      #   - type=local,src=${PROJECT_CACHE_DIR}/.buildx-cache
       args:
         - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
         - BASE_IMAGE_NAME=${BASE_IMAGE_NAME}

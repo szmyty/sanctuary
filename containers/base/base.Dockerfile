@@ -184,6 +184,11 @@ COPY --chown=root:root --chmod=644 config/.gitconfig ${GIT_CONFIG}
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
     echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
+# Fix for update-alternatives: error: error creating symbolic link '/usr/share/man/man1/rmid.1.gz.dpkg-tmp': No such file or directory
+# See https://github.com/debuerreotype/docker-debian-artifacts/issues/24#issuecomment-360870939
+RUN mkdir -p /usr/share/man/man1
+
+
 # Stage 2: Installing APT Dependencies.
 FROM setup AS apt-install
 
