@@ -562,7 +562,7 @@ secring.*
 temp/
 
 # Default output directories
-classes/
+# classes/
 deploy/
 javadoc/
 

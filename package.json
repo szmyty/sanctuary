@@ -18,7 +18,8 @@
         "install:shellcheck": "asdf install shellcheck",
         "commit": "cz",
         "postinstall": "syncpack fix-mismatches",
-        "trying": "syncpack --version"
+        "trying": "syncpack --version",
+        "article": "bash scripts/build.sh articles"
     },
     "keywords": [
         "development",
@@ -45,7 +46,7 @@
         "shellcheck": "^3.0.0",
         "syncpack": "^13.0.0"
     },
-    "packageManager": "pnpm@9.9.0",
+    "packageManager": "pnpm@9.11.0",
     "eslintConfig": {
         "extends": "google"
     },
