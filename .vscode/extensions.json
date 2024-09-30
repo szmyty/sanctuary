@@ -12,6 +12,8 @@
         "tal7aouy.rainbow-bracket",
         "chrmarti.regex",
         "equinusocio.vsc-material-theme-icons",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+        "hashicorp.terraform",
+        "redhat.ansible"
     ]
 }

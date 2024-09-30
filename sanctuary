@@ -48,17 +48,6 @@ IFS=$'\n\t'
 # $@ handles empty parameter list and white-space within parameters correctly
 # $@
 
-# Export the DOCKER_BUILDKIT environment variable
-export \
-    DOCKER_BUILDKIT=1 \
-    BUILDX_EXPERIMENTAL=1 \
-    BUILDKIT_MULTI_PLATFORM=1 \
-    COMPOSE_EXPERIMENTAL=1 \
-    BUILDKIT_PROGRESS=plain \
-    PROJECT_DEBUG=1
-        # BUILDKIT_CACHE_MOUNT_NS="sanctuary-cache-ns" \
-        # DOCKER_DEFAULT_PLATFORM=linux/arm64 \
-
 # Function to setup Docker command with optional debug flags
 setupdocker_command() {
     # Find the Docker executable path
@@ -171,7 +160,7 @@ ensure_buildx_builder() {
 # ensure_docker_swarm
 
 build_base_image() {
-    ${docker_command} compose \
+    docker compose \
         --file sanctuary.yml \
         --env-file sanctuary.env \
         --env-file containers/base/base.env \
@@ -217,7 +206,9 @@ start_services() {
 }
 
 build_base_image
+# echo "HELLO"
 
+# printenv | sort
 
 
 # if [[ "${TRACE-0}" == "1" ]];
