@@ -1,13 +1,24 @@
 #!/usr/bin/env bash
 
-# The script expects the project name as the first argument.
+# Check if an argument is provided
 if [[ -z "${1}" ]]; then
-    echo "Usage: $0 <project-name>"
+    echo "Usage: $0 <path_to_article_directory>"
     exit 1
 fi
 
-# Save the project name in an environment variable.
-export PROJECT_NAME="${1}"
+# full path to the TeX root (the directory containing the article)
+TEX_ROOT="$(realpath "${1}")"
+
+# Extract the project name (the last component of the path)
+PROJECT_NAME="$(basename "${TEX_ROOT}")"
+
+# Export the project name
+export PROJECT_NAME
+export TEX_ROOT
+
+# Now you can use $TEX_ROOT and $PROJECT_NAME in your script
+echo "TeX root directory: ${TEX_ROOT}"
+echo "Project name: ${PROJECT_NAME}"
 
 # The project root is the directory where the script is executed.
 if [[ -z "${PROJECT_ROOT}" ]]; then
@@ -18,8 +29,10 @@ fi
 echo "Building project ${PROJECT_NAME} in ${PROJECT_ROOT}"
 
 export LATEXMKRC_FILE="${PROJECT_ROOT}/.latexmkrc"
-export TEX_PROJECT_ROOT="${PROJECT_ROOT}/${1}"
-export MAIN_TEX_FILE="${TEX_PROJECT_ROOT}/main.tex"
+export TEX_PROJECT_ROOT="${TEX_ROOT}"
+export MAIN_TEX_FILE_NAME="main"
+export MAIN_TEX_FILE="${TEX_PROJECT_ROOT}/${MAIN_TEX_FILE_NAME}.tex"
+export PROJECT_CACHE_DIR="${PROJECT_ROOT}/.cache/latex";
 
 if [[ ! -d "${TEX_PROJECT_ROOT}" ]]; then
     echo "Project directory not found: ${TEX_PROJECT_ROOT}"
@@ -36,7 +49,11 @@ if [[ ! -f "${MAIN_TEX_FILE}" ]]; then
     exit 1
 fi
 
-latexmk -pdf -r "${PROJECT_ROOT}/.latexmkrc" "${MAIN_TEX_FILE}"
+latexmk \
+    "${MAIN_TEX_FILE}" \
+    -deps-out="${PROJECT_CACHE_DIR}/${PROJECT_NAME}.deps" \
+    -recorder \
+    -verbose
 
 # Check if latexmk was successful.
 if [[ $? -eq 0 ]]; then
