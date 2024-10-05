@@ -141,6 +141,7 @@
             "buildx",
             "commitizen",
             "commitlint",
+            "endregion",
             "ipam",
             "minio",
             "Mulan",
@@ -228,7 +229,6 @@
         "latex-workshop.latex.outDir": "%DIR%/output",
         "latex-workshop.latex.magic.args": [
             "-synctex=1",
-            "-interaction=nonstopmode",
             "-file-line-error",
             "-shell-escape",
             "-halt-on-error",

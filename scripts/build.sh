@@ -53,6 +53,7 @@ latexmk \
     "${MAIN_TEX_FILE}" \
     -deps-out="${PROJECT_CACHE_DIR}/${PROJECT_NAME}.deps" \
     -recorder \
+    -interaction=nonstopmode \
     -verbose
 
 # Check if latexmk was successful.

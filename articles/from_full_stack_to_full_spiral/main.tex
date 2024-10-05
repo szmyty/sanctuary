@@ -1,104 +1,172 @@
-\documentclass{article}
+%! Compiler = xelatex --shell-escape
+%! BibTeX Compiler = biber
+% !TEX TS-program = xelatex
+% !TEX encoding = UTF-8
+%! Author = Alan Szmyt
+%! Date = 08/05/2024
+
+%! Preamble.
+\documentclass[12pt, a4paper]{extarticle}
+
+%! Latex Compiler Specific Configuration.
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\else
+\ifXeTeX
+\usepackage{fontspec}
+% \setmainfont{Bitter}[
+%     Path=./resources/fonts/Bitter/,
+%     Scale=0.85,
+%     Extension = .ttf,
+%     UprightFont=*-Regular,
+%     BoldFont=*-Bold,
+%     ItalicFont=*-Italic,
+%     BoldItalicFont=*-BoldItalic
+% ]
+\else
+\usepackage{luatextra}
+\fi
+\defaultfontfeatures{Ligatures=TeX}
+\fi
+
+%! Packages
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{lipsum} % for placeholder text, remove when actual content is written
+\usepackage{lipsum}
+\usepackage{subfiles}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{fvextra}
+\usepackage{csquotes}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{ulem}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage[outputdir=../.cache/latex/out]{minted}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usepackage{todonotes}
+\usepackage{subcaption}
+\usepackage{fontawesome}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{mediumarticle}
 
-\title{From Full-Stack to Full-Spiral: The Evolution of the Modern Developer}
+% Set language.
+\setmainlanguage{english}
+
+% Setting graphics path to image/figures.
+\graphicspath {{./resources/graphics/}}
+
+% Adjust the title up.
+% \setlength{\droptitle}{-4em}
+
+% \apptocmd{\thebibliography}{\raggedright}{}{}
+
+%! region Colors.
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+%! region Styling
+% Set highlighting color.
+\sethlcolor{yellow}
+
+% Set spacing between table and caption.
+\captionsetup[table]{skip=8pt}
+
+% Style subsections.
+\titleformat{\subsection}{\normalfont\fontsize{12}{15}}{\thesubsection}{1em}{}
+
+% Python code styling.
+\lstset{frame=tb,
+    language=Python,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=flexible,
+    basicstyle={\small\ttfamily},
+    numbers=none,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{mauve},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=3
+}
+
+% Header and Footer Styles.
+\fancypagestyle{firstpage}
+{
+    \fancyhead[L]{}
+    \fancyhead[R]{ \includegraphics[width=2cm,height=2cm,keepaspectratio]{logo}}
+    \fancyfoot[R]{Page \thepage \hspace{1pt} of~\pageref{LastPage}}
+}
+
+\fancypagestyle{pages}
+{
+    \fancyhead{}
+    \fancyfoot[R]{Page \thepage \hspace{1pt} of~\pageref{LastPage}}
+    \addtolength{\topmargin}{-16.34447pt}
+}
+
+%! Commands/Variables
+\renewcommand{\UrlFont}{\bfseries}
+\newcommand{\var}[1]{\texorpdfstring{#1}\xspace}
+\newcommand{\answer}[1]{\textbf{Answer: }\par#1}
+\newcommand{\versus}{vs.}
+\newcommand{\xtrain}{\var{$X_{train}$}}
+\newcommand{\xtest}{\var{$X_{test}$}}
+\newcommand{\question}[1]{\section{Question \thesection: \var{\normalfont\normalsize{{#1}}}} \label{sec:question\thesection}}
+\newcommand{\subquestion}[1]{\subsection{#1} \label{subsec:question\thesubsection}}
+
+% Set the author.
 \author{Alan Szmyt}
+
+% Set the title.
+\title{From Full-Stack to Full-Spiral: The Evolution of the Modern Developer}
+
+% Set the date.
 \date{\today}
 
+% Start the document.
 \begin{document}
 
-\maketitle
+    % Show all references from bib file without needing to cite them.
+    \nocite{*}
 
-\begin{abstract}
-In the ever-evolving world of technology, the role of the developer has expanded far beyond traditional boundaries. This article explores the journey from being a full-stack developer to embracing the concept of a full-spiral developer—a holistic approach that intertwines technical expertise with personal growth and continuous learning. We'll delve into how abstraction layers, DevOps practices, and philosophical perspectives like Spiral Dynamics converge to redefine what it means to be a developer today.
-\end{abstract}
+    % Create title from the title macro.
+    \maketitle
 
-\section{Introduction}
+    % Include the abstract.
+    \subfile{abstract}
 
-I've always been fascinated by the idea of creating a seamless, push-to-start system—a solution so intuitive that deploying infrastructure and applications becomes as simple as pressing a button. This quest led me down a path of introspection about the layers of abstraction we navigate as developers. From the physical hardware and machine code to assembly languages like C, up through Bash scripts and orchestration tools, each layer represents a loop in our development journey.
+    % Include the introduction.
+    \subfile{introduction}
 
-But as I pondered this concept further, I realized that our progression isn't just a loop—it's a spiral. Each iteration doesn't just bring us back to the starting point; it elevates us to a new level of understanding. This realization inspired the idea of the \textbf{full-spiral developer}.
+    % Include the evolution of the developer's role section.
+    \subfile{the_evolution_of_the_developers_role}
 
-\vspace{0.5cm}
-\noindent\includegraphics[width=\linewidth]{spiral_developer_placeholder.jpg}
-\newline
-\textit{Figure 1: The journey from hardware to UI, represented as an ascending spiral of growth and learning.}
-\vspace{0.5cm}
+    % Include the full-spiral developer section.
+    \subfile{introducing_the_full_spiral_developer}
 
-\section{The Evolution of the Developer's Role}
+    % Include the push-to-start and push-to-restart paradox section.
+    \subfile{the_push_to_start_and_push_to_restart_paradox}
 
-Traditionally, the term \textbf{full-stack developer} refers to someone proficient in both back-end and front-end technologies. However, in today's complex technological landscape, this definition feels somewhat limiting. Modern development encompasses a broader spectrum—including infrastructure as code, continuous integration and deployment (CI/CD), cloud services, and user experience design.
+    % Include the embracing the spiral dynamics in development section.
+    \subfile{embracing_the_spiral_dynamics_in_development}
 
-As we integrate DevOps practices and infrastructure management into our workflows, the term \textbf{full-loop developer} emerges. This concept captures the cyclical nature of development, where we continuously loop through coding, testing, deploying, and monitoring.
+    % Include the conclusion section.
+    \subfile{conclusion}
 
-But even this feels incomplete. The loop suggests a closed cycle, yet our experiences and skills don't just cycle—they build upon each other. Each pass through the loop adds a new layer of depth, much like the threads of a spiral weaving upwards.
-
-\vspace{0.5cm}
-\noindent\includegraphics[width=\linewidth]{loop_developer_placeholder.jpg}
-\newline
-\textit{Figure 2: The full-loop developer cycles through all layers of technology, from infrastructure to UI.}
-\vspace{0.5cm}
-
-\section{Introducing the Full-Spiral Developer}
-
-Drawing inspiration from \textbf{Spiral Dynamics}\footnote{\href{https://en.wikipedia.org/wiki/Spiral_Dynamics}{Spiral Dynamics on Wikipedia}}, a psychological model that explores human development, the \textbf{full-spiral developer} represents an evolution in how we approach our craft. It's not just about cycling through tasks but about ascending to new heights with each iteration—integrating new knowledge, refining skills, and expanding our perspectives.
-
-As full-spiral developers, we embrace the entirety of the development process:
-
-\begin{itemize}
-    \item \textbf{Foundation:} Understanding the low-level workings of hardware and machine code.
-    \item \textbf{Abstraction:} Writing efficient code in languages like C and leveraging scripting languages like Bash for automation.
-    \item \textbf{Orchestration:} Utilizing tools like Terraform for infrastructure as code, Docker for containerization, and Kubernetes for container orchestration.
-    \item \textbf{User Experience:} Designing intuitive user interfaces and ensuring seamless user interactions.
-    \item \textbf{Personal Growth:} Continuously learning, reflecting, and integrating new philosophies and methodologies into our practice.
-\end{itemize}
-
-\vspace{0.5cm}
-\noindent\includegraphics[width=\linewidth]{spiral_staircase_placeholder.jpg}
-\newline
-\textit{Figure 3: The ascending spiral staircase symbolizes continuous growth and the integration of new skills.}
-\vspace{0.5cm}
-
-\section{The Push-to-Start and Push-to-Restart Paradox}
-
-In pursuing the ideal of a push-to-start system, I've often encountered the paradox of needing a push-to-restart mechanism. The ability to destroy and rebuild systems effortlessly is crucial in today's agile environments. This mirrors our personal and professional journeys—we must be willing to deconstruct and reevaluate our beliefs and methods to grow.
-
-This cyclical process of building, evaluating, and rebuilding is not a setback but an essential aspect of development. It aligns with the spiral concept, where each loop represents not a repetition but an elevation.
-
-\vspace{0.5cm}
-\noindent\includegraphics[width=\linewidth]{push_to_start_placeholder.jpg}
-\newline
-\textit{Figure 4: The push-to-start system embodies the cyclical yet elevating nature of development.}
-\vspace{0.5cm}
-
-\section{Embracing the Spiral Dynamics in Development}
-
-The integration of \textbf{Spiral Dynamics} into our development philosophy encourages us to view challenges and complexities as opportunities for growth. By recognizing that each layer of abstraction and each new tool adds to our upward spiral, we can appreciate the holistic nature of our work.
-
-Moreover, this perspective fosters empathy and collaboration. Understanding that everyone is at a different point in their spiral journey allows us to support one another more effectively, bridging gaps between disciplines and expertise levels.
-
-\section{Conclusion}
-
-The evolution from a full-stack to a full-spiral developer reflects the ever-expanding scope of our roles. It's a recognition that development is not just about mastering technologies but about continuous growth—both technically and personally.
-
-As we embrace this concept, we open ourselves to new possibilities, innovative solutions, and a deeper understanding of the interconnectedness of our work. The spiral is not just a path we follow; it's a journey we shape with every line of code, every system we build, and every challenge we overcome.
-
-\vspace{0.5cm}
-\noindent\includegraphics[width=\linewidth]{infinite_loop_placeholder.jpg}
-\newline
-\textit{Figure 5: The infinite loop symbolizes the continuous cycle of learning and development in our journey.}
-\vspace{0.5cm}
-
-\section*{References}
-
-\begin{itemize}
-    \item \textbf{Spiral Dynamics:} \href{https://en.wikipedia.org/wiki/Spiral_Dynamics}{Understanding the Model of Human Development}
-    \item \textbf{Terraform:} \href{https://www.hashicorp.com/products/terraform}{Infrastructure as Code Tool}
-    \item \textbf{Bash:} \href{https://www.gnu.org/software/bash/}{GNU Bash Shell}
-    \item \textbf{Docker and Kubernetes:} \href{https://www.docker.com/}{Containerization Platform} and \href{https://kubernetes.io/}{Container Orchestration System}
-    \item \textbf{Bad Friends Podcast:} \href{https://www.youtube.com/channel/UC3e8IMJ8R5fp8xCXmciZQpQ}{A comedic podcast that inspired the "Loop Loop" character}
-\end{itemize}
+    \subfile{references}
 
 \end{document}

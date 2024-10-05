@@ -49,14 +49,26 @@ $ENV{"TEX_RESOURCES"} = "$ENV{\"TEX_PROJECT_ROOT\"}/resources";
 # Set the TEX_STYLE environment variable to point to the style directory.
 $ENV{"TEX_STYLE"} = "$ENV{\"TEX_RESOURCES\"}/style";
 
+# Add TEX_STYLE to TEXINPUTS so LaTeX can find the style files.
+ensure_path("TEXINPUTS", "$ENV{\"TEX_STYLE\"}//");
+
 # Set LUA_SCRIPTS environment variable to point to the Lua scripts directory.
 $ENV{"LUA_SCRIPTS"} = "$ENV{\"TEX_RESOURCES\"}/scripts";
+
+# Add LUA_SCRIPTS to TEXINPUTS for Lua scripts access.
+ensure_path("TEXINPUTS", "$ENV{\"LUA_SCRIPTS\"}//");
 
 # Set the TEX_FONTS environment variable to point to the fonts directory.
 $ENV{"TEX_FONTS"} = "$ENV{\"TEX_RESOURCES\"}/fonts";
 
+# Add TEX_FONTS to TEXINPUTS so LaTeX can find the font files.
+ensure_path("TEXINPUTS", "$ENV{\"TEX_FONTS\"}//");
+
 # Set the TEX_IMAGES environment variable to point to the images directory.
 $ENV{"TEX_IMAGES"} = "$ENV{\"TEX_RESOURCES\"}/images";
+
+# Add TEX_IMAGES to TEXINPUTS so LaTeX can find the image files.
+ensure_path("TEXINPUTS", "$ENV{\"TEX_IMAGES\"}//");
 
 # Set the TEX_TABLES environment variable to point to the tables directory.
 $ENV{"TEX_TABLES"} = "$ENV{\"TEX_RESOURCES\"}/tables";
@@ -67,34 +79,30 @@ $ENV{"TEX_BIB"} = "$ENV{\"TEX_RESOURCES\"}/bib";
 # Set the TEX_DATA environment variable to point to the data directory.
 $ENV{"TEX_DATA"} = "$ENV{\"TEX_RESOURCES\"}/data";
 
-$ENV{"PROJECT_OUT_DIR"} = "$ENV{\"PROJECT_CACHE_DIR\"}/out";
-
-$ENV{"AUX_DIR"} = "$ENV{\"PROJECT_OUT_DIR\"}/aux";
-
-$ENV{"TMPDIR"} = "$ENV{\"PROJECT_CACHE_DIR\"}/tmp";
-
-# Add TEX_STYLE to TEXINPUTS so LaTeX can find the style files.
-ensure_path("TEXINPUTS", "$ENV{\"TEX_STYLE\"}//");
-
-ensure_path("TEXINPUTS", "$ENV{\"TEX_IMAGES\"}//");
-
-# Add LUA_SCRIPTS to TEXINPUTS for Lua scripts access.
-ensure_path("TEXINPUTS", "$ENV{\"LUA_SCRIPTS\"}//");
-
 # Ensure './texmf//' is in '$TEXINPUTS' for custom LaTeX packages.
-ensure_path("TEXINPUTS", "./texmf//");
+ensure_path("TEXINPUTS",  "$ENV{\"TEX_PROJECT_ROOT\"}/texmf//");
 
 # Ensure './classes//' is in '$TEXINPUTS' for custom LaTeX classes.
 ensure_path("TEXINPUTS", "$ENV{\"TEX_PROJECT_ROOT\"}/classes//");
 
 # Ensure './components//' is in '$TEXINPUTS' for custom LaTeX components
-ensure_path("TEXINPUTS", "$ENV{\"PROJECT_ROOT\"}/components//");
+ensure_path("TEXINPUTS", "$ENV{\"TEX_PROJECT_ROOT\"}/components//");
+
+# Set the PROJECT_OUT_DIR environment variable to point to the output directory.
+$ENV{"PROJECT_OUT_DIR"} = "$ENV{\"PROJECT_CACHE_DIR\"}/out";
+
+# Set the AUX_DIR environment variable to point to the auxiliary directory.
+$ENV{"AUX_DIR"} = "$ENV{\"PROJECT_OUT_DIR\"}/aux";
+
+# Set the TMPDIR environment variable to point to the temporary directory.
+$ENV{"TMPDIR"} = "$ENV{\"PROJECT_CACHE_DIR\"}/tmp";
 
 # Set the default file to process.
 @default_files = ("$ENV{\"MAIN_TEX_FILE\"}");
 
 # Set the LaTeX commands with shell-escape, synctex, and other options.
-set_tex_cmds("--shell-escape --synctex=1 -file-line-error -8bit -interaction=nonstopmode, %O %S");
+# set_tex_cmds("--shell-escape --synctex=1 -file-line-error -8bit -interaction=nonstopmode, %O %S");
+set_tex_cmds("--shell-escape --synctex=1, %O %S");
 
 # PDF-generating modes:
 # 1: pdflatex (traditional method)
@@ -173,4 +181,4 @@ $clean_ext .= "%R.ist %R.xdy";
 
 $compiling_cmd = "echo COMPILING %P...";
 $failure_cmd = "echo FAILURE %P...";
-# $success_cmd = "echo SUCCESS %P... && texqc && texsc && pandoc $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.html && pandoc $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.md && pandoc $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.rtf && magick -density 300 $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.pdf $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.png";
+$success_cmd = "echo SUCCESS %P... && texqc && texsc && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.html && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.md && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.rtf && magick -density 300 $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.pdf $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.png";

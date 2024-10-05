@@ -1,0 +1,45 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mediumarticle}[Custom Package with Utility Commands]
+
+% Load any required packages
+\RequirePackage{graphicx}
+\RequirePackage{caption}
+\RequirePackage{hyperref} % If needed
+
+% Define custom commands
+
+% Command to include figures with captions
+\newcommand{\figureimage}[3][]{%
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=\linewidth]{#2}
+        \caption{#3}
+        \ifx&#1&% Check if label is empty
+        \else
+            \label{#1}
+        \fi
+    \end{figure}
+}
+
+% Example of another custom command
+% Command to format code snippets
+\usepackage{listings,xcolor}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    captionpos=b
+}
+
+\lstset{style=mystyle}
+
+\newcommand{\includecode}[3][]{%
+    \lstinputlisting[caption={#3}, label={#1}]{#2}
+}
