@@ -100,6 +100,17 @@ $ENV{"AUX_DIR"} = "$ENV{\"PROJECT_OUT_DIR\"}/aux";
 # Set the TMPDIR environment variable to point to the temporary directory.
 $ENV{"TMPDIR"} = "$ENV{\"PROJECT_CACHE_DIR\"}/tmp";
 
+# Hook to ensure TMPDIR exists before running xelatex
+sub before_xelatex {
+    if (! -d $ENV{'TMPDIR'}) {
+        print "Creating TMPDIR: $ENV{'TMPDIR'}\n";
+        system("mkdir -p $ENV{'TMPDIR'}");
+    }
+}
+
+# If the value if $allow_subdir_creation is 0, no action is taken. If it is 1, then the appropriate subdirectory is created and a rerun of *latex is triggered, but only if the file being written is an .aux file. If the value of $allow_subdir_creation is 2, then the subdirectory creation is done independently of which type of file.
+$allow_subdir_creation = 2;
+
 # Set the default file to process.
 @default_files = ("$ENV{\"MAIN_TEX_FILE\"}");
 

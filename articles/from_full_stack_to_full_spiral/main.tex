@@ -13,17 +13,9 @@
 \ExplSyntaxOn
 
 \NewDocumentCommand{\getenv}{om}
- {
-  \sys_get_shell:nnN { kpsewhich ~ --var-value ~ #2 } { } \l_tmpa_tl
-  \tl_trim_spaces:N \l_tmpa_tl
-  \IfNoValueTF { #1 }
-   {
-    \tl_use:N \l_tmpa_tl
-   }
-   {
-    \tl_set_eq:NN #1 \l_tmpa_tl
-   }
- }
+{
+  \sys_get_shell:nnN{ kpsewhich ~ --var-value ~ #2 }{}#1
+}
 
 \ExplSyntaxOff
 
@@ -54,7 +46,8 @@
 \usepackage{mathtools}
 \usepackage{listings}
 \usepackage{polyglossia}
-\usepackage{soul,soulutf8}
+\usepackage{bookmark}
+\usepackage{soul}
 \usepackage{mediumarticle}
 
 %! Latex Compiler Specific Configuration.
@@ -175,7 +168,7 @@
     \maketitle
 
     \getenv[\HOME]{HOME}
-
+    \HOME
     % % Include the abstract.
     % \subfile{abstract}
 
