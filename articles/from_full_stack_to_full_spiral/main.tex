@@ -8,31 +8,8 @@
 %! Preamble.
 \documentclass[12pt, a4paper]{extarticle}
 
-%! Latex Compiler Specific Configuration.
-\usepackage{iftex}
-\ifPDFTeX
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\else
-\ifXeTeX
-\usepackage{fontspec}
-% \setmainfont{Bitter}[
-%     Path=./resources/fonts/Bitter/,
-%     Scale=0.85,
-%     Extension = .ttf,
-%     UprightFont=*-Regular,
-%     BoldFont=*-Bold,
-%     ItalicFont=*-Italic,
-%     BoldItalicFont=*-BoldItalic
-% ]
-\else
-\usepackage{luatextra}
-\fi
-\defaultfontfeatures{Ligatures=TeX}
-\fi
-
 %! Packages
+\usepackage[a4paper, margin=2.9cm, headsep=10pt, headheight={61.24997pt}]{geometry}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{lipsum}
@@ -51,13 +28,43 @@
 \usepackage[outputdir=../.cache/latex/out]{minted}
 \usepackage{tcolorbox}
 \usepackage{tikz}
-\usepackage{todonotes}
 \usepackage{subcaption}
-\usepackage{fontawesome}
+% \usepackage{fontawesome}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{listings}
 \usepackage{mediumarticle}
+
+%! Latex Compiler Specific Configuration.
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[sfdefault]{roboto}
+\renewcommand{\familydefault}{\sfdefault}
+\else
+\ifXeTeX
+\usepackage{fontspec}
+% Set Roboto as the main font.
+\setmainfont{Roboto}[
+    Path=./resources/fonts/Roboto/,
+    Scale=0.85,
+    Extension = .ttf,
+    UprightFont=*-Regular,
+    BoldFont=*-Bold,
+    ItalicFont=*-Italic,
+    BoldItalicFont=*-BoldItalic
+]
+\else
+\usepackage{luatextra}
+\fi
+\defaultfontfeatures{Ligatures=TeX}
+\fi
+
+\setlength {\marginparwidth }{2cm}
+\usepackage{todonotes}
 
 % Set language.
 \setmainlanguage{english}
@@ -80,53 +87,53 @@
 \sethlcolor{yellow}
 
 % Set spacing between table and caption.
-\captionsetup[table]{skip=8pt}
+% \captionsetup[table]{skip=8pt}
 
 % Style subsections.
-\titleformat{\subsection}{\normalfont\fontsize{12}{15}}{\thesubsection}{1em}{}
+% \titleformat{\subsection}{\normalfont\fontsize{12}{15}}{\thesubsection}{1em}{}
 
 % Python code styling.
-\lstset{frame=tb,
-    language=Python,
-    aboveskip=3mm,
-    belowskip=3mm,
-    showstringspaces=false,
-    columns=flexible,
-    basicstyle={\small\ttfamily},
-    numbers=none,
-    numberstyle=\tiny\color{gray},
-    keywordstyle=\color{blue},
-    commentstyle=\color{gray},
-    stringstyle=\color{mauve},
-    breaklines=true,
-    breakatwhitespace=true,
-    tabsize=3
-}
+% \lstset{frame=tb,
+%     language=Python,
+%     aboveskip=3mm,
+%     belowskip=3mm,
+%     showstringspaces=false,
+%     columns=flexible,
+%     basicstyle={\small\ttfamily},
+%     numbers=none,
+%     numberstyle=\tiny\color{gray},
+%     keywordstyle=\color{blue},
+%     commentstyle=\color{gray},
+%     stringstyle=\color{mauve},
+%     breaklines=true,
+%     breakatwhitespace=true,
+%     tabsize=3
+% }
 
 % Header and Footer Styles.
-\fancypagestyle{firstpage}
-{
-    \fancyhead[L]{}
-    \fancyhead[R]{ \includegraphics[width=2cm,height=2cm,keepaspectratio]{logo}}
-    \fancyfoot[R]{Page \thepage \hspace{1pt} of~\pageref{LastPage}}
-}
+% \fancypagestyle{firstpage}
+% {
+%     \fancyhead[L]{}
+%     \fancyhead[R]{ \includegraphics[width=2cm,height=2cm,keepaspectratio]{logo}}
+%     \fancyfoot[R]{Page \thepage \hspace{1pt} of~\pageref{LastPage}}
+% }
 
-\fancypagestyle{pages}
-{
-    \fancyhead{}
-    \fancyfoot[R]{Page \thepage \hspace{1pt} of~\pageref{LastPage}}
-    \addtolength{\topmargin}{-16.34447pt}
-}
+% \fancypagestyle{pages}
+% {
+%     \fancyhead{}
+%     \fancyfoot[R]{Page \thepage \hspace{1pt} of~\pageref{LastPage}}
+%     \addtolength{\topmargin}{-16.34447pt}
+% }
 
 %! Commands/Variables
-\renewcommand{\UrlFont}{\bfseries}
-\newcommand{\var}[1]{\texorpdfstring{#1}\xspace}
-\newcommand{\answer}[1]{\textbf{Answer: }\par#1}
-\newcommand{\versus}{vs.}
-\newcommand{\xtrain}{\var{$X_{train}$}}
-\newcommand{\xtest}{\var{$X_{test}$}}
-\newcommand{\question}[1]{\section{Question \thesection: \var{\normalfont\normalsize{{#1}}}} \label{sec:question\thesection}}
-\newcommand{\subquestion}[1]{\subsection{#1} \label{subsec:question\thesubsection}}
+% \renewcommand{\UrlFont}{\bfseries}
+% \newcommand{\var}[1]{\texorpdfstring{#1}\xspace}
+% \newcommand{\answer}[1]{\textbf{Answer: }\par#1}
+% \newcommand{\versus}{vs.}
+% \newcommand{\xtrain}{\var{$X_{train}$}}
+% \newcommand{\xtest}{\var{$X_{test}$}}
+% \newcommand{\question}[1]{\section{Question \thesection: \var{\normalfont\normalsize{{#1}}}} \label{sec:question\thesection}}
+% \newcommand{\subquestion}[1]{\subsection{#1} \label{subsec:question\thesubsection}}
 
 % Set the author.
 \author{Alan Szmyt}
@@ -152,21 +159,21 @@
     % Include the introduction.
     \subfile{introduction}
 
-    % Include the evolution of the developer's role section.
-    \subfile{the_evolution_of_the_developers_role}
+    % % Include the evolution of the developer's role section.
+    % \subfile{the_evolution_of_the_developers_role}
 
-    % Include the full-spiral developer section.
-    \subfile{introducing_the_full_spiral_developer}
+    % % Include the full-spiral developer section.
+    % \subfile{introducing_the_full_spiral_developer}
 
-    % Include the push-to-start and push-to-restart paradox section.
-    \subfile{the_push_to_start_and_push_to_restart_paradox}
+    % % Include the push-to-start and push-to-restart paradox section.
+    % \subfile{the_push_to_start_and_push_to_restart_paradox}
 
-    % Include the embracing the spiral dynamics in development section.
-    \subfile{embracing_the_spiral_dynamics_in_development}
+    % % Include the embracing the spiral dynamics in development section.
+    % \subfile{embracing_the_spiral_dynamics_in_development}
 
-    % Include the conclusion section.
-    \subfile{conclusion}
+    % % Include the conclusion section.
+    % \subfile{conclusion}
 
-    \subfile{references}
+    % \subfile{references}
 
 \end{document}

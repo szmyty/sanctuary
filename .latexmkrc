@@ -73,6 +73,9 @@ ensure_path("TEXINPUTS", "$ENV{\"TEX_IMAGES\"}//");
 # Set the TEX_TABLES environment variable to point to the tables directory.
 $ENV{"TEX_TABLES"} = "$ENV{\"TEX_RESOURCES\"}/tables";
 
+# Add TEX_TABLES to TEXINPUTS so LaTeX can find the image files.
+ensure_path("TEXINPUTS", "$ENV{\"TEX_TABLES\"}//");
+
 # Set the TEX_BIB environment variable to point to the bibliography directory.
 $ENV{"TEX_BIB"} = "$ENV{\"TEX_RESOURCES\"}/bib";
 
@@ -80,13 +83,13 @@ $ENV{"TEX_BIB"} = "$ENV{\"TEX_RESOURCES\"}/bib";
 $ENV{"TEX_DATA"} = "$ENV{\"TEX_RESOURCES\"}/data";
 
 # Ensure './texmf//' is in '$TEXINPUTS' for custom LaTeX packages.
-ensure_path("TEXINPUTS",  "$ENV{\"TEX_PROJECT_ROOT\"}/texmf//");
+ensure_path("TEXINPUTS",  "$ENV{\"TEX_RESOURCES\"}/texmf//");
 
 # Ensure './classes//' is in '$TEXINPUTS' for custom LaTeX classes.
-ensure_path("TEXINPUTS", "$ENV{\"TEX_PROJECT_ROOT\"}/classes//");
+ensure_path("TEXINPUTS", "$ENV{\"TEX_RESOURCES\"}/classes//");
 
 # Ensure './components//' is in '$TEXINPUTS' for custom LaTeX components
-ensure_path("TEXINPUTS", "$ENV{\"TEX_PROJECT_ROOT\"}/components//");
+ensure_path("TEXINPUTS", "$ENV{\"TEX_RESOURCES\"}/components//");
 
 # Set the PROJECT_OUT_DIR environment variable to point to the output directory.
 $ENV{"PROJECT_OUT_DIR"} = "$ENV{\"PROJECT_CACHE_DIR\"}/out";
@@ -181,4 +184,4 @@ $clean_ext .= "%R.ist %R.xdy";
 
 $compiling_cmd = "echo COMPILING %P...";
 $failure_cmd = "echo FAILURE %P...";
-$success_cmd = "echo SUCCESS %P... && texqc && texsc && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.html && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.md && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.rtf && magick -density 300 $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.pdf $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.png";
+# $success_cmd = "echo SUCCESS %P... && texqc && texsc && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.html && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.md && pandoc --resource-path=$ENV{\"TEX_IMAGES\"} --embed-resources --standalone $ENV{\"MAIN_TEX_FILE\"} -o $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.rtf && magick -density 300 $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.pdf $ENV{\"PROJECT_OUT_DIR\"}/$ENV{\"MAIN_TEX_FILE_NAME\"}.png";
