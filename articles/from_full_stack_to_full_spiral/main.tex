@@ -7,6 +7,25 @@
 
 %! Preamble.
 \documentclass[12pt, a4paper]{extarticle}
+\usepackage{xparse}
+\usepackage{ifxetex, ifluatex}
+
+\ExplSyntaxOn
+
+\NewDocumentCommand{\getenv}{om}
+ {
+  \sys_get_shell:nnN { kpsewhich ~ --var-value ~ #2 } { } \l_tmpa_tl
+  \tl_trim_spaces:N \l_tmpa_tl
+  \IfNoValueTF { #1 }
+   {
+    \tl_use:N \l_tmpa_tl
+   }
+   {
+    \tl_set_eq:NN #1 \l_tmpa_tl
+   }
+ }
+
+\ExplSyntaxOff
 
 %! Packages
 \usepackage[a4paper, margin=2.9cm, headsep=10pt, headheight={61.24997pt}]{geometry}
@@ -34,36 +53,38 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{listings}
+\usepackage{polyglossia}
+\usepackage{soul,soulutf8}
 \usepackage{mediumarticle}
 
 %! Latex Compiler Specific Configuration.
 \usepackage{iftex}
 \ifPDFTeX
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage[sfdefault]{roboto}
-\renewcommand{\familydefault}{\sfdefault}
+    \usepackage[utf8]{inputenc}
+    \usepackage[T1]{fontenc}
+    \usepackage{lmodern}
+    \usepackage[sfdefault]{roboto}
+    \renewcommand{\familydefault}{\sfdefault}
 \else
 \ifXeTeX
-\usepackage{fontspec}
-% Set Roboto as the main font.
-\setmainfont{Roboto}[
-    Path=./resources/fonts/Roboto/,
-    Scale=0.85,
-    Extension = .ttf,
-    UprightFont=*-Regular,
-    BoldFont=*-Bold,
-    ItalicFont=*-Italic,
-    BoldItalicFont=*-BoldItalic
-]
+    \usepackage{fontspec}
+    % Set Roboto as the main font.
+    % \setmainfont{Roboto}[
+    %     Path=./resources/fonts/Roboto/,
+    %     Scale=0.85,
+    %     Extension = .ttf,
+    %     UprightFont=*-Regular,
+    %     BoldFont=*-Bold,
+    %     ItalicFont=*-Italic,
+    %     BoldItalicFont=*-BoldItalic
+    % ]
 \else
-\usepackage{luatextra}
+    \usepackage{luatextra}
 \fi
-\defaultfontfeatures{Ligatures=TeX}
+    \defaultfontfeatures{Ligatures=TeX}
 \fi
 
-\setlength {\marginparwidth }{2cm}
+\setlength {\marginparwidth}{2cm}
 \usepackage{todonotes}
 
 % Set language.
@@ -153,11 +174,13 @@
     % Create title from the title macro.
     \maketitle
 
-    % Include the abstract.
-    \subfile{abstract}
+    \getenv[\HOME]{HOME}
 
-    % Include the introduction.
-    \subfile{introduction}
+    % % Include the abstract.
+    % \subfile{abstract}
+
+    % % Include the introduction.
+    % \subfile{introduction}
 
     % % Include the evolution of the developer's role section.
     % \subfile{the_evolution_of_the_developers_role}
