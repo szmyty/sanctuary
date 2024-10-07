@@ -1,0 +1,15 @@
+\documentclass{article}
+\usepackage{catchfile} % For reading file content into a variable
+\usepackage{verbatim}  % For verbatim display of text
+
+% Use \immediate\write18 to execute the shell command and redirect the output to a file
+\immediate\write18{printenv | sort > envoutput.txt}
+
+\begin{document}
+
+\section*{Environment Variables}
+
+% Use \verbatiminput to read the content of the file directly and display it
+\verbatiminput{envoutput.txt}
+
+\end{document}

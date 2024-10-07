@@ -7,19 +7,10 @@
 
 %! Preamble.
 \documentclass[12pt, a4paper]{extarticle}
-\usepackage{xparse}
-\usepackage{ifxetex, ifluatex}
-
-\ExplSyntaxOn
-
-\NewDocumentCommand{\getenv}{om}
-{
-  \sys_get_shell:nnN{ kpsewhich ~ --var-value ~ #2 }{}#1
-}
-
-\ExplSyntaxOff
 
 %! Packages
+\usepackage{xparse}
+\usepackage{ifxetex, ifluatex}
 \usepackage[a4paper, margin=2.9cm, headsep=10pt, headheight={61.24997pt}]{geometry}
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -49,6 +40,7 @@
 \usepackage{bookmark}
 \usepackage{soul}
 \usepackage{mediumarticle}
+% \usepackage{bashful}
 
 %! Latex Compiler Specific Configuration.
 \usepackage{iftex}
@@ -167,16 +159,14 @@
     % Create title from the title macro.
     \maketitle
 
-    \getenv[\HOME]{HOME}
-    \HOME
-    % % Include the abstract.
-    % \subfile{abstract}
+    % Include the abstract.
+    \subfile{abstract}
 
-    % % Include the introduction.
-    % \subfile{introduction}
+    % Include the introduction.
+    \subfile{introduction}
 
     % % Include the evolution of the developer's role section.
-    % \subfile{the_evolution_of_the_developers_role}
+    \subfile{the_evolution_of_the_developers_role}
 
     % % Include the full-spiral developer section.
     % \subfile{introducing_the_full_spiral_developer}

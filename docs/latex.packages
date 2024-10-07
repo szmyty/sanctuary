@@ -201,6 +201,7 @@ https://ctan.org/pkg/ycbook
 https://ctan.org/pkg/tlc-article
 https://ctan.org/pkg/langcode
 https://ctan.org/pkg/ltxcmds
+https://www.ctan.org/pkg/bashful
 https://ctan.org/pkg/bibcop
 https://ctan.org/pkg/latexmake
 https://ctan.org/pkg/l3docstrip
@@ -239,3 +240,6 @@ https://ctan.org/pkg/sesstime
 https://ctan.org/pkg/courseoutline
 https://ctan.org/pkg/fancyslides
 https://ctan.org/pkg/texliveonfly
+https://www.ctan.org/pkg/make-env
+https://www.ctan.org/pkg/address
+https://www.ctan.org/pkg/envelope
