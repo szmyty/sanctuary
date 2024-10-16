@@ -874,8 +874,8 @@ Backup of *.doc*
 *.psm
 *.bak
 *.cmp
-*.jpg
-*.html
+# *.jpg
+# *.html
 *.bsf
 
 # Ignore simulation output of ModelSim

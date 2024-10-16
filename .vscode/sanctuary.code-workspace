@@ -4,6 +4,7 @@
             "path": ".."
         }
     ],
+
     "settings": {
         "search.followSymlinks": false,
         "editor.minimap.enabled": false,
@@ -80,6 +81,8 @@
         "github.gitProtocol": "https",
         "html.autoClosingTags": true,
         "html.format.enable": true,
+        "html.format.indentInnerHtml": true,
+        "html.format.wrapLineLength": 120,
         "java.debug.settings.enableRunDebugCodeLens": true,
         "json.format.enable": true,
         "json.validate.enable": true,
@@ -136,6 +139,10 @@
             "commit-msg": "shellscript",
             "pre-commit": "shellscript",
             "*.mailmap": "plaintext"
+        },
+        "emmet.includeLanguages": {
+            "javascript": "javascriptreact",
+            "html": "html"
         },
         "cSpell.words": [
             "buildx",
